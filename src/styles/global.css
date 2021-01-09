@@ -1,0 +1,30 @@
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+}
+
+[id*="downshift-"] {
+	z-index: 10000;
+}
+
+[data-magic-box][data-magic-box][data-magic-box] {
+	align-items: var(--mb--ai);
+	display: var(--mb--d, block);
+	height: var(--mb--h);
+	justify-content: var(--mb--jc);
+	overflow: var(--mb--ov);
+	padding: var(--mb--p);
+	width: var(--mb--w);
+}
+
+[data-magic-box][data-magic-box][data-magic-box][data-magic-stack] > * {
+	margin-right: var(--mb-ms--sp);
+}
+
+[data-magic-box][data-magic-box][data-magic-box][data-magic-stack]
+	> *:last-child {
+	margin-right: 0;
+}
