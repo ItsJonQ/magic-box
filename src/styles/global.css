@@ -13,6 +13,7 @@ body {
 [data-magic-box][data-magic-box][data-magic-box] {
 	align-items: var(--mb--ai);
 	display: var(--mb--d, block);
+	flex-direction: var(--mb--fxd);
 	height: var(--mb--h);
 	justify-content: var(--mb--jc);
 	overflow: var(--mb--ov);

@@ -86,7 +86,9 @@ const theme = createTheme(({ get, space, theme }) => {
 		colorPink900: "#831843",
 	};
 
-	const FONT_PROPS = {};
+	const FONT_PROPS = {
+		fontSize: "12px",
+	};
 
 	const CONTROL_PROPS = {
 		controlBackgroundColor: "rgba(0, 0, 0, 0.05)",
