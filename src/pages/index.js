@@ -37,6 +37,7 @@ import {
 	ContextSystemProvider,
 	MagicBox,
 	PrefixText,
+	SectionFormGroup,
 	SoftIcon,
 	TextInputSlider,
 	UnitInputSlider,
@@ -118,7 +119,7 @@ function LayoutSection() {
 					)}
 				</Dropdown>
 			</HStack>
-			<FormGroup label="Size">
+			<SectionFormGroup label="Size">
 				<Grid align="center" gap={2}>
 					<UnitInput
 						prefix={<PrefixText>W</PrefixText>}
@@ -137,20 +138,20 @@ function LayoutSection() {
 						onChange={setAttribute("height")}
 					/>
 				</Grid>
-			</FormGroup>
+			</SectionFormGroup>
 
 			{hasMargin && <BoxControl label="Margin" value="margin" />}
 
 			{hasPadding && <BoxControl label="Padding" value="padding" min={0} />}
 
 			{hasOverflow && (
-				<FormGroup label="Overflow">
+				<SectionFormGroup label="Overflow">
 					<SegmentedControl
 						value={overflow}
 						options={overflowOptions}
 						onChange={setAttribute("overflow")}
 					/>
-				</FormGroup>
+				</SectionFormGroup>
 			)}
 		</ListGroup>
 	);
@@ -186,14 +187,14 @@ function StackSection() {
 			</HStack>
 			{hasStack && (
 				<>
-					<FormGroup label="Direction">
+					<SectionFormGroup label="Direction">
 						<SegmentedControl
 							value={stack?.flexDirection}
 							options={flexDirectionOptions}
 							onChange={setAttribute("stack.flexDirection")}
 						/>
-					</FormGroup>
-					<FormGroup label="Align">
+					</SectionFormGroup>
+					<SectionFormGroup label="Align">
 						<SelectDropdown
 							isPreviewable
 							minWidth={160}
@@ -203,8 +204,8 @@ function StackSection() {
 							value={stack?.alignItems}
 							options={alignItemsOptions}
 						/>
-					</FormGroup>
-					<FormGroup label="Distribution">
+					</SectionFormGroup>
+					<SectionFormGroup label="Distribution">
 						<SelectDropdown
 							minWidth={160}
 							isPreviewable
@@ -214,14 +215,14 @@ function StackSection() {
 							value={stack?.justifyContent}
 							options={justifyContentOptions}
 						/>
-					</FormGroup>
-					<FormGroup label="Gap">
+					</SectionFormGroup>
+					<SectionFormGroup label="Gap">
 						<UnitInputSlider
 							value={stack?.gap}
 							min={0}
 							onChange={setAttribute("stack.gap")}
 						/>
-					</FormGroup>
+					</SectionFormGroup>
 				</>
 			)}
 		</ListGroup>
@@ -328,7 +329,7 @@ function EffectsSection() {
 				</Dropdown>
 			</HStack>
 			{hasOpacity && (
-				<FormGroup label="Opacity">
+				<SectionFormGroup label="Opacity">
 					<TextInputSlider
 						type="number"
 						min={0}
@@ -337,10 +338,10 @@ function EffectsSection() {
 						suffix={<PrefixText>%</PrefixText>}
 						onChange={setAttribute("opacity")}
 					/>
-				</FormGroup>
+				</SectionFormGroup>
 			)}
 			{hasBlur && (
-				<FormGroup label="Blur">
+				<SectionFormGroup label="Blur">
 					<UnitInputSlider
 						min={0}
 						max={100}
@@ -348,7 +349,7 @@ function EffectsSection() {
 						sliderMax={20}
 						onChange={setAttribute("blur")}
 					/>
-				</FormGroup>
+				</SectionFormGroup>
 			)}
 		</ListGroup>
 	);

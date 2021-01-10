@@ -8,6 +8,7 @@ import {
 } from "react-icons/fi";
 import { useAppStore } from "@lib/appStore";
 import React from "react";
+import { SectionFormGroup } from "./SectionFormGroup";
 import { PrefixText } from "./PrefixText";
 
 export function BoxControl({ label, value, ...otherProps }) {
@@ -15,7 +16,7 @@ export function BoxControl({ label, value, ...otherProps }) {
 	const attributes = _attributes[value];
 
 	return (
-		<FormGroup label={label}>
+		<SectionFormGroup label={label}>
 			<Grid
 				css={{
 					columnGap: ui.space(2),
@@ -71,6 +72,6 @@ export function BoxControl({ label, value, ...otherProps }) {
 					{...otherProps}
 				/>
 			</Grid>
-		</FormGroup>
+		</SectionFormGroup>
 	);
 }
