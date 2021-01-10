@@ -97,11 +97,33 @@ function TextSliderInput({ type, value, onChange, ...props }) {
 	);
 }
 
-function UnitSliderInput({ type, value, onChange, ...props }) {
+function UnitSliderInput({
+	type,
+	value,
+	onChange,
+	min,
+	max,
+	sliderMin,
+	sliderMax,
+	...props
+}) {
 	return (
 		<Grid gap={2}>
-			<UnitInput type={type} value={value} onChange={onChange} {...props} />
-			<Slider value={value} onChange={onChange} {...props} />
+			<UnitInput
+				type={type}
+				value={value}
+				onChange={onChange}
+				min={min}
+				max={max}
+				{...props}
+			/>
+			<Slider
+				value={value}
+				onChange={onChange}
+				min={sliderMin || min}
+				max={sliderMax || max}
+				{...props}
+			/>
 		</Grid>
 	);
 }
@@ -175,6 +197,7 @@ const ViewBox = ({ children, ...props }) => {
 const MagicBox = (props) => {
 	const { attributes } = useAppStore();
 	const {
+		blur,
 		opacity,
 		height,
 		margin,
@@ -186,6 +209,7 @@ const MagicBox = (props) => {
 
 	const style = {
 		"--mb--ai": flexAlignment[stack?.alignItems?.value],
+		"--mb--blr": blur,
 		"--mb--d": stack?.display,
 		"--mb--fxd": stack?.flexDirection,
 		"--mb--h": height,
@@ -307,6 +331,7 @@ export default function Home() {
 	const { attributes, setAttribute } = useAppStore();
 
 	const {
+		blur,
 		margin,
 		padding,
 		opacity,
@@ -337,6 +362,8 @@ export default function Home() {
 
 	const toggleOverflow = () =>
 		setAttribute("overflow")(overflow ? null : "auto");
+
+	const toggleBlur = () => setAttribute("blur")(!_.isNil(blur) ? null : 0);
 
 	const toggleOpacity = () =>
 		setAttribute("opacity")(!_.isNil(opacity) ? null : 100);
@@ -581,7 +608,15 @@ export default function Home() {
 																>
 																	Opacity
 																</DropdownMenuItem>
-																<DropdownMenuItem>Scale</DropdownMenuItem>
+																<DropdownMenuItem
+																	isSelected={!_.isNil(blur)}
+																	onClick={() => {
+																		toggleBlur();
+																		toggle();
+																	}}
+																>
+																	Blur
+																</DropdownMenuItem>
 															</DropdownMenu>
 														</>
 													)}
@@ -596,6 +631,17 @@ export default function Home() {
 														value={opacity}
 														suffix={<PrefixText>%</PrefixText>}
 														onChange={setAttribute("opacity")}
+													/>
+												</FormGroup>
+											)}
+											{!_.isNil(blur) && (
+												<FormGroup label="Blur">
+													<UnitSliderInput
+														min={0}
+														max={100}
+														value={blur}
+														sliderMax={20}
+														onChange={setAttribute("blur")}
 													/>
 												</FormGroup>
 											)}

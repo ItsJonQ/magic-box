@@ -12,6 +12,7 @@ body {
 
 [data-magic-box][data-magic-box][data-magic-box] {
 	align-items: var(--mb--ai);
+	filter: blur(var(--mb--blr));
 	display: var(--mb--d, block);
 	flex-direction: var(--mb--fxd);
 	height: var(--mb--h);
