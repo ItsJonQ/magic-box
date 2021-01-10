@@ -187,8 +187,9 @@ export default function Home() {
 	const hasStack = !!stack;
 
 	const toggleStack = () =>
-		setAttribute("stack")(stack ? null : defaultStackAttributes);
-	const togglePadding = () => setAttribute("padding")(padding ? null : 0);
+		setAttribute("stack")(stack ? null : { ...{}, ...defaultStackAttributes });
+	const togglePadding = () =>
+		setAttribute("padding")(!_.isNil(padding) ? null : 0);
 	const toggleOverflow = () =>
 		setAttribute("overflow")(overflow ? null : "auto");
 	const stackIcon = !hasStack ? <FiPlus /> : <FiMinus />;
@@ -230,21 +231,37 @@ export default function Home() {
 												<Text weight={600}>Layout</Text>
 												<FlexBlock />
 												<Dropdown placement="bottom-end">
-													<DropdownTrigger
-														size="small"
-														icon={<FiPlus />}
-														isSubtle
-														isControl
-													/>
-													<DropdownMenu minWidth={80} maxWidth={160}>
-														<DropdownMenuItem>Margin</DropdownMenuItem>
-														<DropdownMenuItem onClick={togglePadding}>
-															Padding
-														</DropdownMenuItem>
-														<DropdownMenuItem onClick={toggleOverflow}>
-															Overflow
-														</DropdownMenuItem>
-													</DropdownMenu>
+													{({ toggle }) => (
+														<>
+															<DropdownTrigger
+																size="small"
+																icon={<FiPlus />}
+																isSubtle
+																isControl
+															/>
+															<DropdownMenu minWidth={80} maxWidth={160}>
+																<DropdownMenuItem onClick={toggle}>
+																	Margin
+																</DropdownMenuItem>
+																<DropdownMenuItem
+																	onClick={() => {
+																		togglePadding();
+																		toggle();
+																	}}
+																>
+																	Padding
+																</DropdownMenuItem>
+																<DropdownMenuItem
+																	onClick={() => {
+																		toggleOverflow();
+																		toggle();
+																	}}
+																>
+																	Overflow
+																</DropdownMenuItem>
+															</DropdownMenu>
+														</>
+													)}
 												</Dropdown>
 											</HStack>
 											<FormGroup label="Width">
