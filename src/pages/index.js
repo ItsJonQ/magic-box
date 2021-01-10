@@ -37,6 +37,7 @@ import {
 	FiMoreHorizontal,
 	FiLayout,
 	FiTrello,
+	FiType,
 	FiLoader,
 	FiAperture,
 	FiLayers,
@@ -259,7 +260,14 @@ const AppIcon = ({ icon = <FiLayers />, color = "green" }) => {
 };
 
 const PrefixText = (props) => (
-	<Text size={10} variant="muted" isBlock lineHeight={1} {...props} />
+	<Text
+		css={{ pointerEvents: "none" }}
+		size={10}
+		variant="muted"
+		isBlock
+		lineHeight={1}
+		{...props}
+	/>
 );
 
 const BoxControl = ({ label, value, ...otherProps }) => {
@@ -407,7 +415,7 @@ export default function Home() {
 									<VStack spacing={1}>
 										<ListGroup>
 											<HStack spacing={3}>
-												<AppIcon icon={<FiLayers />} color="blue" />
+												<AppIcon icon={<FiLayout />} color="blue" />
 												<Text weight={600}>Layout</Text>
 												<FlexBlock />
 												<Dropdown placement="bottom-end">
@@ -419,7 +427,7 @@ export default function Home() {
 																isSubtle
 																isControl
 															/>
-															<DropdownMenu minWidth={80} maxWidth={160}>
+															<DropdownMenu minWidth={160} maxWidth={160}>
 																<DropdownMenuItem
 																	onClick={() => {
 																		toggleSize();
@@ -564,6 +572,37 @@ export default function Home() {
 										</View>
 										<ListGroup>
 											<HStack spacing={3}>
+												<AppIcon icon={<FiType />} color="pink" />
+												<Text weight={600}>Typography</Text>
+												<FlexBlock />
+												<Dropdown placement="bottom-end">
+													{({ toggle }) => (
+														<>
+															<DropdownTrigger
+																size="small"
+																icon={<FiMoreHorizontal />}
+																isSubtle
+																isControl
+															/>
+															<DropdownMenu minWidth={160} maxWidth={160}>
+																<DropdownMenuItem
+																	onClick={() => {
+																		toggle();
+																	}}
+																>
+																	Font Family
+																</DropdownMenuItem>
+															</DropdownMenu>
+														</>
+													)}
+												</Dropdown>
+											</HStack>
+										</ListGroup>
+										<View>
+											<Separator css={{ opacity: 0.6 }} />
+										</View>
+										<ListGroup>
+											<HStack spacing={3}>
 												<AppIcon icon={<FiLoader />} color="green" />
 												<Text weight={600}>Styles</Text>
 												<FlexBlock />
@@ -589,7 +628,11 @@ export default function Home() {
 												<AppIcon icon={<FiAperture />} color="indigo" />
 												<Text weight={600}>Effects</Text>
 												<FlexBlock />
-												<Dropdown placement="bottom-end">
+												<Dropdown
+													placement="bottom-end"
+													minWidth={160}
+													maxWidth={160}
+												>
 													{({ toggle }) => (
 														<>
 															<DropdownTrigger
