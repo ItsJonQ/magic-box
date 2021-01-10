@@ -264,11 +264,15 @@ function StylesSection() {
 				<Text weight={600}>Styles</Text>
 				<FlexBlock />
 				<Dropdown placement="bottom-end">
-					<DropdownTrigger icon={<FiMoreHorizontal />} />
-					<DropdownMenu>
-						<DropdownMenuItem>Background</DropdownMenuItem>
-						<DropdownMenuItem>Border</DropdownMenuItem>
-					</DropdownMenu>
+					{({ toggle }) => (
+						<>
+							<DropdownTrigger icon={<FiMoreHorizontal />} />
+							<DropdownMenu>
+								<DropdownMenuItem onClick={toggle}>Background</DropdownMenuItem>
+								<DropdownMenuItem onClick={toggle}>Border</DropdownMenuItem>
+							</DropdownMenu>
+						</>
+					)}
 				</Dropdown>
 			</HStack>
 		</ListGroup>
