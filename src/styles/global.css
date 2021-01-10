@@ -16,16 +16,34 @@ body {
 	flex-direction: var(--mb--fxd);
 	height: var(--mb--h);
 	justify-content: var(--mb--jc);
+	margin-bottom: var(--mb--mb);
+	margin-left: var(--mb--ml);
+	margin-right: var(--mb--mr);
+	margin-top: var(--mb--mt);
+	opacity: var(--mb--op);
 	overflow: var(--mb--ov);
-	padding: var(--mb--p);
+	padding-bottom: var(--mb--pb);
+	padding-left: var(--mb--pl);
+	padding-right: var(--mb--pr);
+	padding-top: var(--mb--pt);
 	width: var(--mb--w);
 }
 
-[data-magic-box][data-magic-box][data-magic-box][data-magic-stack] > * {
+[data-magic-box][data-magic-box][data-magic-box][data-magic-stack="row"] > * {
 	margin-right: var(--mb-ms--sp);
 }
 
-[data-magic-box][data-magic-box][data-magic-box][data-magic-stack]
+[data-magic-box][data-magic-box][data-magic-box][data-magic-stack="row"]
 	> *:last-child {
 	margin-right: 0;
+}
+
+[data-magic-box][data-magic-box][data-magic-box][data-magic-stack="column"]
+	> * {
+	margin-bottom: var(--mb-ms--sp);
+}
+
+[data-magic-box][data-magic-box][data-magic-box][data-magic-stack="column"]
+	> *:last-child {
+	margin-bottom: 0;
 }

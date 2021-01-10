@@ -30,6 +30,11 @@ import {
 	ContextSystemProvider,
 } from "@wp-g2/components";
 import {
+	FiArrowUp,
+	FiArrowDown,
+	FiArrowLeft,
+	FiArrowRight,
+	FiMoreHorizontal,
 	FiLayout,
 	FiTrello,
 	FiLoader,
@@ -59,16 +64,16 @@ const justifyContentOptions = [
 
 const alignItemsOptions = [
 	{
-		label: "Top",
-		value: "top",
+		label: "Start",
+		value: "start",
 	},
 	{
 		label: "Center",
 		value: "center",
 	},
 	{
-		label: "Bottom",
-		value: "bottom",
+		label: "End",
+		value: "end",
 	},
 ];
 
@@ -85,8 +90,17 @@ const flexDirectionOptions = [
 
 function TextSliderInput({ type, value, onChange, ...props }) {
 	return (
-		<Grid>
+		<Grid gap={2}>
 			<TextInput type={type} value={value} onChange={onChange} {...props} />
+			<Slider value={value} onChange={onChange} {...props} />
+		</Grid>
+	);
+}
+
+function UnitSliderInput({ type, value, onChange, ...props }) {
+	return (
+		<Grid gap={2}>
+			<UnitInput type={type} value={value} onChange={onChange} {...props} />
 			<Slider value={value} onChange={onChange} {...props} />
 		</Grid>
 	);
@@ -97,7 +111,21 @@ const defaultStackAttributes = {
 	alignItems: alignItemsOptions[1],
 	justifyContent: justifyContentOptions[1],
 	flexDirection: "row",
-	gap: 10,
+	gap: "10px",
+};
+
+const defaultPaddingAttributes = {
+	top: 0,
+	bottom: 0,
+	left: 0,
+	right: 0,
+};
+
+const defaultMarginAttributes = {
+	top: 0,
+	bottom: 0,
+	left: 0,
+	right: 0,
 };
 
 const appStore = createStore((set, get) => ({
@@ -105,6 +133,7 @@ const appStore = createStore((set, get) => ({
 		height: "auto",
 		width: "auto",
 		overflow: null,
+		margin: null,
 		padding: null,
 		stack: null,
 	},
@@ -124,6 +153,7 @@ const flexAlignment = {
 	start: "flex-start",
 	center: "center",
 	end: "flex-end",
+	top: "flex-start",
 	bottom: "flex-end",
 };
 
@@ -144,7 +174,15 @@ const ViewBox = ({ children, ...props }) => {
 
 const MagicBox = (props) => {
 	const { attributes } = useAppStore();
-	const { height, width, padding, overflow, stack } = attributes;
+	const {
+		opacity,
+		height,
+		margin,
+		width,
+		padding,
+		overflow,
+		stack,
+	} = attributes;
 
 	const style = {
 		"--mb--ai": flexAlignment[stack?.alignItems?.value],
@@ -152,14 +190,31 @@ const MagicBox = (props) => {
 		"--mb--fxd": stack?.flexDirection,
 		"--mb--h": height,
 		"--mb--jc": flexAlignment[stack?.justifyContent?.value],
-		"--mb--p": ui.value.px(padding),
+		"--mb--mt": margin?.top,
+		"--mb--mb": margin?.bottom,
+		"--mb--ml": margin?.left,
+		"--mb--mr": margin?.right,
+		"--mb--pt": padding?.top,
+		"--mb--pb": padding?.bottom,
+		"--mb--pl": padding?.left,
+		"--mb--pr": padding?.right,
+		"--mb--op": _.isNil(opacity) ? null : opacity / 100,
 		"--mb--ov": overflow,
 		"--mb--w": width,
 		"--mb-ms--sp": ui.value.px(stack?.gap),
 		outline: "2px solid rgba(0, 0, 255, 0.1)",
 	};
 
-	return <div {...props} data-magic-box data-magic-stack style={style} />;
+	const isColumn = stack?.flexDirection === "column";
+
+	return (
+		<div
+			{...props}
+			data-magic-box
+			data-magic-stack={isColumn ? "column" : "row"}
+			style={style}
+		/>
+	);
 };
 
 const AppIcon = ({ icon = <FiLayers />, color = "green" }) => {
@@ -179,19 +234,113 @@ const AppIcon = ({ icon = <FiLayers />, color = "green" }) => {
 	);
 };
 
+const PrefixText = (props) => (
+	<Text size={10} variant="muted" isBlock lineHeight={1} {...props} />
+);
+
+const BoxControl = ({ label, value, ...otherProps }) => {
+	const { attributes: _attributes, setAttribute } = useAppStore();
+	const attributes = _attributes[value];
+
+	return (
+		<FormGroup label={label}>
+			<Grid
+				css={{
+					columnGap: ui.space(2),
+					rowGap: ui.space(1),
+				}}
+			>
+				<UnitInput
+					gap={1}
+					value={attributes?.top}
+					onChange={setAttribute(`${value}.top`)}
+					cssProp={value}
+					prefix={
+						<PrefixText>
+							<Icon icon={<FiArrowUp />} size={8} />
+						</PrefixText>
+					}
+					{...otherProps}
+				/>
+				<UnitInput
+					gap={1}
+					value={attributes?.bottom}
+					onChange={setAttribute(`${value}.bottom`)}
+					cssProp={value}
+					prefix={
+						<PrefixText>
+							<Icon icon={<FiArrowDown />} size={8} />
+						</PrefixText>
+					}
+					{...otherProps}
+				/>
+				<UnitInput
+					gap={1}
+					cssProp={value}
+					value={attributes?.left}
+					onChange={setAttribute(`${value}.left`)}
+					prefix={
+						<PrefixText>
+							<Icon icon={<FiArrowLeft />} size={8} />
+						</PrefixText>
+					}
+					{...otherProps}
+				/>
+				<UnitInput
+					gap={1}
+					cssProp={value}
+					value={attributes?.right}
+					onChange={setAttribute(`${value}.right`)}
+					prefix={
+						<PrefixText>
+							<Icon icon={<FiArrowRight />} size={8} />
+						</PrefixText>
+					}
+					{...otherProps}
+				/>
+			</Grid>
+		</FormGroup>
+	);
+};
+
 export default function Home() {
 	const { attributes, setAttribute } = useAppStore();
 
-	const { padding, overflow, width, stack, height } = attributes;
+	const {
+		margin,
+		padding,
+		opacity,
+		overflow,
+		width,
+		stack,
+		height,
+	} = attributes;
 
 	const hasStack = !!stack;
 
+	const toggleSize = () => {
+		setAttribute("height")("auto");
+		setAttribute("width")("auto");
+	};
+
 	const toggleStack = () =>
 		setAttribute("stack")(stack ? null : { ...{}, ...defaultStackAttributes });
+
 	const togglePadding = () =>
-		setAttribute("padding")(!_.isNil(padding) ? null : 0);
+		setAttribute("padding")(
+			padding ? null : { ...{}, ...defaultPaddingAttributes }
+		);
+	const toggleMargin = () =>
+		setAttribute("margin")(
+			margin ? null : { ...{}, ...defaultMarginAttributes }
+		);
+
 	const toggleOverflow = () =>
 		setAttribute("overflow")(overflow ? null : "auto");
+
+	const toggleOpacity = () =>
+		setAttribute("opacity")(!_.isNil(opacity) ? null : 100);
+
 	const stackIcon = !hasStack ? <FiPlus /> : <FiMinus />;
 
 	return (
@@ -203,24 +352,28 @@ export default function Home() {
 				</Head>
 				<Container>
 					<Grid css={{ padding: 50 }}>
-						<MagicBox>
-							<ViewBox>
-								<div style={{ height: 50, background: ui.get("colorBlue50") }}>
-									hello
-								</div>
-							</ViewBox>
-							<ViewBox>
-								<div
-									style={{
-										height: 100,
-										width: 100,
-										background: ui.get("colorRed50"),
-									}}
-								>
-									hello
-								</div>
-							</ViewBox>
-						</MagicBox>
+						<View>
+							<MagicBox>
+								<ViewBox>
+									<div
+										style={{ height: 50, background: ui.get("colorBlue50") }}
+									>
+										hello
+									</div>
+								</ViewBox>
+								<ViewBox>
+									<div
+										style={{
+											height: 100,
+											width: 100,
+											background: ui.get("colorRed50"),
+										}}
+									>
+										hello
+									</div>
+								</ViewBox>
+							</MagicBox>
+						</View>
 						<Container width={280}>
 							<Card isBorderless elevation={5}>
 								<CardBody>
@@ -235,15 +388,30 @@ export default function Home() {
 														<>
 															<DropdownTrigger
 																size="small"
-																icon={<FiPlus />}
+																icon={<FiMoreHorizontal />}
 																isSubtle
 																isControl
 															/>
 															<DropdownMenu minWidth={80} maxWidth={160}>
-																<DropdownMenuItem onClick={toggle}>
+																<DropdownMenuItem
+																	onClick={() => {
+																		toggleSize();
+																		toggle();
+																	}}
+																>
+																	Size
+																</DropdownMenuItem>
+																<DropdownMenuItem
+																	isSelected={!!margin}
+																	onClick={() => {
+																		toggleMargin();
+																		toggle();
+																	}}
+																>
 																	Margin
 																</DropdownMenuItem>
 																<DropdownMenuItem
+																	isSelected={!!padding}
 																	onClick={() => {
 																		togglePadding();
 																		toggle();
@@ -252,6 +420,7 @@ export default function Home() {
 																	Padding
 																</DropdownMenuItem>
 																<DropdownMenuItem
+																	isSelected={!!overflow}
 																	onClick={() => {
 																		toggleOverflow();
 																		toggle();
@@ -264,34 +433,34 @@ export default function Home() {
 													)}
 												</Dropdown>
 											</HStack>
-											<FormGroup label="Width">
-												<UnitInput
-													arrows
-													cssProp="width"
-													value={width}
-													min={0}
-													onChange={setAttribute("width")}
-												/>
-											</FormGroup>
-											<FormGroup label="Height">
-												<UnitInput
-													arrows
-													value={height}
-													cssProp="height"
-													min={0}
-													onChange={setAttribute("height")}
-												/>
-											</FormGroup>
-											{!_.isNil(padding) && (
-												<FormGroup label="Padding">
-													<TextSliderInput
-														type="number"
-														value={padding}
+											<FormGroup label="Size">
+												<Grid align="center" gap={2}>
+													<UnitInput
+														prefix={<PrefixText>W</PrefixText>}
+														gap={1.5}
+														cssProp="width"
+														value={width}
 														min={0}
-														onChange={setAttribute("padding")}
+														onChange={setAttribute("width")}
 													/>
-												</FormGroup>
+
+													<UnitInput
+														prefix={<PrefixText>H</PrefixText>}
+														gap={1.5}
+														value={height}
+														cssProp="height"
+														min={0}
+														onChange={setAttribute("height")}
+													/>
+												</Grid>
+											</FormGroup>
+
+											{margin && <BoxControl label="Margin" value="margin" />}
+
+											{padding && (
+												<BoxControl label="Padding" value="padding" min={0} />
 											)}
+
 											{!_.isNil(overflow) && (
 												<FormGroup label="Overflow">
 													<SegmentedControl
@@ -354,8 +523,7 @@ export default function Home() {
 														/>
 													</FormGroup>
 													<FormGroup label="Gap">
-														<TextSliderInput
-															type="number"
+														<UnitSliderInput
 															value={stack?.gap}
 															min={0}
 															onChange={setAttribute("stack.gap")}
@@ -375,7 +543,7 @@ export default function Home() {
 												<Dropdown placement="bottom-end">
 													<DropdownTrigger
 														size="small"
-														icon={<FiPlus />}
+														icon={<FiMoreHorizontal />}
 														isSubtle
 														isControl
 													/>
@@ -395,18 +563,42 @@ export default function Home() {
 												<Text weight={600}>Effects</Text>
 												<FlexBlock />
 												<Dropdown placement="bottom-end">
-													<DropdownTrigger
-														size="small"
-														icon={<FiPlus />}
-														isSubtle
-														isControl
-													/>
-													<DropdownMenu minWidth={120}>
-														<DropdownMenuItem>Opacity</DropdownMenuItem>
-														<DropdownMenuItem>Scale</DropdownMenuItem>
-													</DropdownMenu>
+													{({ toggle }) => (
+														<>
+															<DropdownTrigger
+																size="small"
+																icon={<FiMoreHorizontal />}
+																isSubtle
+																isControl
+															/>
+															<DropdownMenu minWidth={120}>
+																<DropdownMenuItem
+																	isSelected={!_.isNil(opacity)}
+																	onClick={() => {
+																		toggleOpacity();
+																		toggle();
+																	}}
+																>
+																	Opacity
+																</DropdownMenuItem>
+																<DropdownMenuItem>Scale</DropdownMenuItem>
+															</DropdownMenu>
+														</>
+													)}
 												</Dropdown>
 											</HStack>
+											{!_.isNil(opacity) && (
+												<FormGroup label="Opacity">
+													<TextSliderInput
+														type="number"
+														min={0}
+														max={100}
+														value={opacity}
+														suffix={<PrefixText>%</PrefixText>}
+														onChange={setAttribute("opacity")}
+													/>
+												</FormGroup>
+											)}
 										</ListGroup>
 										<View />
 									</VStack>

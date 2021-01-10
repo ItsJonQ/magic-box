@@ -87,7 +87,7 @@ const theme = createTheme(({ get, space, theme }) => {
 	};
 
 	const FONT_PROPS = {
-		fontSize: "12px",
+		fontSize: "11px",
 	};
 
 	const CONTROL_PROPS = {
@@ -102,12 +102,7 @@ const theme = createTheme(({ get, space, theme }) => {
 		controlBorderSubtleColor: "rgba(0, 0, 0, 0.2)",
 		controlBoxShadow: "transparent",
 		controlBoxShadowFocus: `0 0 0 2px ${get("controlBackgroundDimColor")}`,
-		controlHeight: "30px",
-		controlHeightLarge: "36px",
-		controlHeightSmall: "24px",
-		controlHeightXLarge: "44px",
-		controlHeightXSmall: "20px",
-		controlHeightXXSmall: "12px",
+		controlHeight: "28px",
 		controlPaddingX: "8px",
 		controlPaddingXLarge: "16px",
 		controlPaddingXSmall: "4px",
@@ -149,8 +144,12 @@ const theme = createTheme(({ get, space, theme }) => {
 		elevationIntensity: 0.4,
 	};
 
+	const MENU_PROPS = {
+		menuItemHeight: get("controlHeight"),
+	};
+
 	const SEGMENTED_CONTROL_PROPS = {
-		segmentedControlFontSize: "12px",
+		segmentedControlFontSize: get("fontSize"),
 		segmentedControlBackdropBoxShadow: get("controlSurfaceBoxShadow"),
 	};
 
@@ -184,6 +183,7 @@ const theme = createTheme(({ get, space, theme }) => {
 		...COLOR_PROPS,
 		...CONTROL_PROPS,
 		...ELEVATION_PROPS,
+		...MENU_PROPS,
 		...SEGMENTED_CONTROL_PROPS,
 		...SLIDER_PROPS,
 		...SWITCH_PROPS,
