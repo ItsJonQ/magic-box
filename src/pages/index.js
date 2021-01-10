@@ -1,16 +1,12 @@
 import Head from "next/head";
 import {
-	Animated,
 	FormGroup,
 	Container,
 	Grid,
 	Card,
 	CardBody,
 	Button,
-	Icon,
 	ListGroup,
-	ListGroupHeader,
-	ListGroups,
 	SegmentedControl,
 	SelectDropdown,
 	Dropdown,
@@ -19,368 +15,388 @@ import {
 	DropdownMenuItem,
 	HStack,
 	VStack,
-	Slider,
 	FlexBlock,
 	UnitInput,
-	TextInput,
 	Separator,
-	Spacer,
 	Text,
 	View,
-	ContextSystemProvider,
 } from "@wp-g2/components";
 import {
-	FiArrowUp,
-	FiArrowDown,
-	FiArrowLeft,
-	FiArrowRight,
 	FiMoreHorizontal,
 	FiLayout,
 	FiTrello,
 	FiType,
 	FiLoader,
 	FiAperture,
-	FiLayers,
 	FiPlus,
 	FiMinus,
 } from "react-icons/fi";
-import { createStore } from "@wp-g2/substate";
-import { css, cx, ui } from "@wp-g2/styles";
+import { ui } from "@wp-g2/styles";
+import {
+	BoxControl,
+	ContextSystemProvider,
+	MagicBox,
+	PrefixText,
+	SoftIcon,
+	TextInputSlider,
+	UnitInputSlider,
+} from "@components/index";
 import _ from "lodash";
+import {
+	alignItemsOptions,
+	flexDirectionOptions,
+	justifyContentOptions,
+	overflowOptions,
+	useAppStore,
+} from "@lib/appStore";
 
-const justifyContentOptions = [
-	{
-		label: "Start",
-		value: "start",
-	},
-	{
-		label: "Center",
-		value: "center",
-	},
-	{
-		label: "End",
-		value: "end",
-	},
-];
+function LayoutSection() {
+	const {
+		attributes,
+		setAttribute,
+		getHasAttribute,
+		toggleSize,
+		togglePadding,
+		toggleMargin,
+		toggleOverflow,
+	} = useAppStore();
 
-const alignItemsOptions = [
-	{
-		label: "Start",
-		value: "start",
-	},
-	{
-		label: "Center",
-		value: "center",
-	},
-	{
-		label: "End",
-		value: "end",
-	},
-];
+	const { margin, padding, overflow, width, height } = attributes;
 
-const flexDirectionOptions = [
-	{
-		label: "Horizontal",
-		value: "row",
-	},
-	{
-		label: "Vertical",
-		value: "column",
-	},
-];
+	const hasMargin = getHasAttribute("margin");
+	const hasOverflow = getHasAttribute("overflow");
+	const hasPadding = getHasAttribute("padding");
 
-function TextSliderInput({ type, value, onChange, ...props }) {
 	return (
-		<Grid gap={2}>
-			<TextInput type={type} value={value} onChange={onChange} {...props} />
-			<Slider value={value} onChange={onChange} {...props} />
-		</Grid>
+		<ListGroup>
+			<HStack spacing={3}>
+				<SoftIcon icon={<FiLayout />} color="blue" />
+				<Text weight={600}>Layout</Text>
+				<FlexBlock />
+				<Dropdown placement="bottom-end">
+					{({ toggle }) => (
+						<>
+							<DropdownTrigger icon={<FiMoreHorizontal />} />
+							<DropdownMenu>
+								<DropdownMenuItem
+									onClick={() => {
+										toggleSize();
+										toggle();
+									}}
+								>
+									Size
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									isSelected={!!margin}
+									onClick={() => {
+										toggleMargin();
+										toggle();
+									}}
+								>
+									Margin
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									isSelected={!!padding}
+									onClick={() => {
+										togglePadding();
+										toggle();
+									}}
+								>
+									Padding
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									isSelected={!!overflow}
+									onClick={() => {
+										toggleOverflow();
+										toggle();
+									}}
+								>
+									Overflow
+								</DropdownMenuItem>
+							</DropdownMenu>
+						</>
+					)}
+				</Dropdown>
+			</HStack>
+			<FormGroup label="Size">
+				<Grid align="center" gap={2}>
+					<UnitInput
+						prefix={<PrefixText>W</PrefixText>}
+						gap={1.5}
+						cssProp="width"
+						value={width}
+						min={0}
+						onChange={setAttribute("width")}
+					/>
+					<UnitInput
+						prefix={<PrefixText>H</PrefixText>}
+						gap={1.5}
+						value={height}
+						cssProp="height"
+						min={0}
+						onChange={setAttribute("height")}
+					/>
+				</Grid>
+			</FormGroup>
+
+			{hasMargin && <BoxControl label="Margin" value="margin" />}
+
+			{hasPadding && <BoxControl label="Padding" value="padding" min={0} />}
+
+			{hasOverflow && (
+				<FormGroup label="Overflow">
+					<SegmentedControl
+						value={overflow}
+						options={overflowOptions}
+						onChange={setAttribute("overflow")}
+					/>
+				</FormGroup>
+			)}
+		</ListGroup>
 	);
 }
 
-function UnitSliderInput({
-	type,
-	value,
-	onChange,
-	min,
-	max,
-	sliderMin,
-	sliderMax,
-	...props
-}) {
-	return (
-		<Grid gap={2}>
-			<UnitInput
-				type={type}
-				value={value}
-				onChange={onChange}
-				min={min}
-				max={max}
-				{...props}
-			/>
-			<Slider
-				value={value}
-				onChange={onChange}
-				min={sliderMin || min}
-				max={sliderMax || max}
-				{...props}
-			/>
-		</Grid>
-	);
-}
-
-const defaultStackAttributes = {
-	display: "flex",
-	alignItems: alignItemsOptions[1],
-	justifyContent: justifyContentOptions[1],
-	flexDirection: "row",
-	gap: "10px",
-};
-
-const defaultPaddingAttributes = {
-	top: 0,
-	bottom: 0,
-	left: 0,
-	right: 0,
-};
-
-const defaultMarginAttributes = {
-	top: 0,
-	bottom: 0,
-	left: 0,
-	right: 0,
-};
-
-const appStore = createStore((set, get) => ({
-	attributes: {
-		height: "auto",
-		width: "auto",
-		overflow: null,
-		margin: null,
-		padding: null,
-		stack: null,
-	},
-	setAttribute: (attribute) => (next) => {
-		const nextAttributes = _.set(get().attributes, attribute, next);
-		set({
-			attributes: {
-				...nextAttributes,
-			},
-		});
-	},
-}));
-
-const useAppStore = appStore;
-
-const flexAlignment = {
-	start: "flex-start",
-	center: "center",
-	end: "flex-end",
-	top: "flex-start",
-	bottom: "flex-end",
-};
-
-const overflowOptions = [
-	{
-		value: "auto",
-		label: "Auto",
-	},
-	{
-		value: "hidden",
-		label: "Hidden",
-	},
-];
-
-const ViewBox = ({ children, ...props }) => {
-	return <div {...props}>{children}</div>;
-};
-
-const MagicBox = (props) => {
-	const { attributes } = useAppStore();
+function StackSection() {
 	const {
-		blur,
-		opacity,
-		height,
-		margin,
-		width,
-		padding,
-		overflow,
-		stack,
-	} = attributes;
+		attributes,
+		setAttribute,
+		getHasAttribute,
+		toggleStack,
+	} = useAppStore();
 
-	const style = {
-		"--mb--ai": flexAlignment[stack?.alignItems?.value],
-		"--mb--blr": blur,
-		"--mb--d": stack?.display,
-		"--mb--fxd": stack?.flexDirection,
-		"--mb--h": height,
-		"--mb--jc": flexAlignment[stack?.justifyContent?.value],
-		"--mb--mt": margin?.top,
-		"--mb--mb": margin?.bottom,
-		"--mb--ml": margin?.left,
-		"--mb--mr": margin?.right,
-		"--mb--pt": padding?.top,
-		"--mb--pb": padding?.bottom,
-		"--mb--pl": padding?.left,
-		"--mb--pr": padding?.right,
-		"--mb--op": _.isNil(opacity) ? null : opacity / 100,
-		"--mb--ov": overflow,
-		"--mb--w": width,
-		"--mb-ms--sp": ui.value.px(stack?.gap),
-		outline: "2px solid rgba(0, 0, 255, 0.1)",
-	};
+	const { stack } = attributes;
 
-	const isColumn = stack?.flexDirection === "column";
-
-	return (
-		<div
-			{...props}
-			data-magic-box
-			data-magic-stack={isColumn ? "column" : "row"}
-			style={style}
-		/>
-	);
-};
-
-const AppIcon = ({ icon = <FiLayers />, color = "green" }) => {
-	return (
-		<View
-			css={{
-				borderRadius: 8,
-				width: 30,
-				height: 30,
-				padding: 8,
-				backgroundColor: ui.get(`color${_.upperFirst(color)}50`),
-				color: ui.get(`color${_.upperFirst(color)}500`),
-			}}
-		>
-			<Icon icon={icon} size={14} />
-		</View>
-	);
-};
-
-const PrefixText = (props) => (
-	<Text
-		css={{ pointerEvents: "none" }}
-		size={10}
-		variant="muted"
-		isBlock
-		lineHeight={1}
-		{...props}
-	/>
-);
-
-const BoxControl = ({ label, value, ...otherProps }) => {
-	const { attributes: _attributes, setAttribute } = useAppStore();
-	const attributes = _attributes[value];
-
-	return (
-		<FormGroup label={label}>
-			<Grid
-				css={{
-					columnGap: ui.space(2),
-					rowGap: ui.space(1),
-				}}
-			>
-				<UnitInput
-					gap={1}
-					value={attributes?.top}
-					onChange={setAttribute(`${value}.top`)}
-					cssProp={value}
-					prefix={
-						<PrefixText>
-							<Icon icon={<FiArrowUp />} size={8} />
-						</PrefixText>
-					}
-					{...otherProps}
-				/>
-				<UnitInput
-					gap={1}
-					value={attributes?.bottom}
-					onChange={setAttribute(`${value}.bottom`)}
-					cssProp={value}
-					prefix={
-						<PrefixText>
-							<Icon icon={<FiArrowDown />} size={8} />
-						</PrefixText>
-					}
-					{...otherProps}
-				/>
-				<UnitInput
-					gap={1}
-					cssProp={value}
-					value={attributes?.left}
-					onChange={setAttribute(`${value}.left`)}
-					prefix={
-						<PrefixText>
-							<Icon icon={<FiArrowLeft />} size={8} />
-						</PrefixText>
-					}
-					{...otherProps}
-				/>
-				<UnitInput
-					gap={1}
-					cssProp={value}
-					value={attributes?.right}
-					onChange={setAttribute(`${value}.right`)}
-					prefix={
-						<PrefixText>
-							<Icon icon={<FiArrowRight />} size={8} />
-						</PrefixText>
-					}
-					{...otherProps}
-				/>
-			</Grid>
-		</FormGroup>
-	);
-};
-
-export default function Home() {
-	const { attributes, setAttribute } = useAppStore();
-
-	const {
-		blur,
-		margin,
-		padding,
-		opacity,
-		overflow,
-		width,
-		stack,
-		height,
-	} = attributes;
-
-	const hasStack = !!stack;
-
-	const toggleSize = () => {
-		setAttribute("height")("auto");
-		setAttribute("width")("auto");
-	};
-
-	const toggleStack = () =>
-		setAttribute("stack")(stack ? null : { ...{}, ...defaultStackAttributes });
-
-	const togglePadding = () =>
-		setAttribute("padding")(
-			padding ? null : { ...{}, ...defaultPaddingAttributes }
-		);
-	const toggleMargin = () =>
-		setAttribute("margin")(
-			margin ? null : { ...{}, ...defaultMarginAttributes }
-		);
-
-	const toggleOverflow = () =>
-		setAttribute("overflow")(overflow ? null : "auto");
-
-	const toggleBlur = () => setAttribute("blur")(!_.isNil(blur) ? null : 0);
-
-	const toggleOpacity = () =>
-		setAttribute("opacity")(!_.isNil(opacity) ? null : 100);
+	const hasStack = getHasAttribute("stack");
 
 	const stackIcon = !hasStack ? <FiPlus /> : <FiMinus />;
 
 	return (
+		<ListGroup>
+			<HStack spacing={3}>
+				<SoftIcon icon={<FiTrello />} color="yellow" />
+				<Text weight={600}>Stack</Text>
+				<FlexBlock />
+				<Button
+					size="small"
+					icon={stackIcon}
+					isSubtle
+					isControl
+					onClick={toggleStack}
+				/>
+			</HStack>
+			{hasStack && (
+				<>
+					<FormGroup label="Direction">
+						<SegmentedControl
+							value={stack?.flexDirection}
+							options={flexDirectionOptions}
+							onChange={setAttribute("stack.flexDirection")}
+						/>
+					</FormGroup>
+					<FormGroup label="Align">
+						<SelectDropdown
+							isPreviewable
+							minWidth={160}
+							onChange={(next) =>
+								setAttribute("stack.alignItems")(next.selectedItem)
+							}
+							value={stack?.alignItems}
+							options={alignItemsOptions}
+						/>
+					</FormGroup>
+					<FormGroup label="Distribution">
+						<SelectDropdown
+							minWidth={160}
+							isPreviewable
+							onChange={(next) =>
+								setAttribute("stack.justifyContent")(next.selectedItem)
+							}
+							value={stack?.justifyContent}
+							options={justifyContentOptions}
+						/>
+					</FormGroup>
+					<FormGroup label="Gap">
+						<UnitInputSlider
+							value={stack?.gap}
+							min={0}
+							onChange={setAttribute("stack.gap")}
+						/>
+					</FormGroup>
+				</>
+			)}
+		</ListGroup>
+	);
+}
+
+function TypographySection() {
+	return (
+		<ListGroup>
+			<HStack spacing={3}>
+				<SoftIcon icon={<FiType />} color="pink" />
+				<Text weight={600}>Typography</Text>
+				<FlexBlock />
+				<Dropdown placement="bottom-end">
+					{({ toggle }) => (
+						<>
+							<DropdownTrigger icon={<FiMoreHorizontal />} />
+							<DropdownMenu>
+								<DropdownMenuItem
+									onClick={() => {
+										toggle();
+									}}
+								>
+									Font Family
+								</DropdownMenuItem>
+							</DropdownMenu>
+						</>
+					)}
+				</Dropdown>
+			</HStack>
+		</ListGroup>
+	);
+}
+
+function StylesSection() {
+	return (
+		<ListGroup>
+			<HStack spacing={3}>
+				<SoftIcon icon={<FiLoader />} color="green" />
+				<Text weight={600}>Styles</Text>
+				<FlexBlock />
+				<Dropdown placement="bottom-end">
+					<DropdownTrigger icon={<FiMoreHorizontal />} />
+					<DropdownMenu>
+						<DropdownMenuItem>Background</DropdownMenuItem>
+						<DropdownMenuItem>Border</DropdownMenuItem>
+					</DropdownMenu>
+				</Dropdown>
+			</HStack>
+		</ListGroup>
+	);
+}
+
+function EffectsSection() {
+	const {
+		attributes,
+		setAttribute,
+		getHasAttribute,
+		toggleBlur,
+		toggleOpacity,
+	} = useAppStore();
+
+	const { blur, opacity } = attributes;
+
+	const hasBlur = getHasAttribute("blur");
+	const hasOpacity = getHasAttribute("opacity");
+
+	return (
+		<ListGroup>
+			<HStack spacing={3}>
+				<SoftIcon icon={<FiAperture />} color="indigo" />
+				<Text weight={600}>Effects</Text>
+				<FlexBlock />
+				<Dropdown placement="bottom-end">
+					{({ toggle }) => (
+						<>
+							<DropdownTrigger icon={<FiMoreHorizontal />} />
+							<DropdownMenu minWidth={120}>
+								<DropdownMenuItem
+									isSelected={!_.isNil(opacity)}
+									onClick={() => {
+										toggleOpacity();
+										toggle();
+									}}
+								>
+									Opacity
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									isSelected={!_.isNil(blur)}
+									onClick={() => {
+										toggleBlur();
+										toggle();
+									}}
+								>
+									Blur
+								</DropdownMenuItem>
+							</DropdownMenu>
+						</>
+					)}
+				</Dropdown>
+			</HStack>
+			{hasOpacity && (
+				<FormGroup label="Opacity">
+					<TextInputSlider
+						type="number"
+						min={0}
+						max={100}
+						value={opacity}
+						suffix={<PrefixText>%</PrefixText>}
+						onChange={setAttribute("opacity")}
+					/>
+				</FormGroup>
+			)}
+			{hasBlur && (
+				<FormGroup label="Blur">
+					<UnitInputSlider
+						min={0}
+						max={100}
+						value={blur}
+						sliderMax={20}
+						onChange={setAttribute("blur")}
+					/>
+				</FormGroup>
+			)}
+		</ListGroup>
+	);
+}
+
+function SectionSeparator() {
+	return (
 		<View>
-			<ContextSystemProvider value={{ FormGroup: { horizontal: true } }}>
+			<Separator />
+		</View>
+	);
+}
+
+function DemoContent() {
+	return (
+		<MagicBox>
+			<div>
+				<div style={{ height: 50, background: ui.get("colorBlue50") }}>
+					hello
+				</div>
+			</div>
+			<div>
+				<div
+					style={{
+						height: 100,
+						width: 100,
+						background: ui.get("colorRed50"),
+					}}
+				>
+					hello
+				</div>
+			</div>
+		</MagicBox>
+	);
+}
+
+function ContainerCard({ children }) {
+	return (
+		<Container width={280}>
+			<Card isBorderless elevation={5}>
+				<CardBody>
+					<VStack spacing={1}>{children}</VStack>
+				</CardBody>
+			</Card>
+		</Container>
+	);
+}
+
+export default function Home() {
+	return (
+		<View>
+			<ContextSystemProvider>
 				<Head>
 					<title>G2</title>
 					<link rel="icon" href="/favicon.ico" />
@@ -388,312 +404,25 @@ export default function Home() {
 				<Container>
 					<Grid css={{ padding: 50 }}>
 						<View>
-							<MagicBox>
-								<ViewBox>
-									<div
-										style={{ height: 50, background: ui.get("colorBlue50") }}
-									>
-										hello
-									</div>
-								</ViewBox>
-								<ViewBox>
-									<div
-										style={{
-											height: 100,
-											width: 100,
-											background: ui.get("colorRed50"),
-										}}
-									>
-										hello
-									</div>
-								</ViewBox>
-							</MagicBox>
+							<DemoContent />
 						</View>
-						<Container width={280}>
-							<Card isBorderless elevation={5}>
-								<CardBody>
-									<VStack spacing={1}>
-										<ListGroup>
-											<HStack spacing={3}>
-												<AppIcon icon={<FiLayout />} color="blue" />
-												<Text weight={600}>Layout</Text>
-												<FlexBlock />
-												<Dropdown placement="bottom-end">
-													{({ toggle }) => (
-														<>
-															<DropdownTrigger
-																size="small"
-																icon={<FiMoreHorizontal />}
-																isSubtle
-																isControl
-															/>
-															<DropdownMenu minWidth={160} maxWidth={160}>
-																<DropdownMenuItem
-																	onClick={() => {
-																		toggleSize();
-																		toggle();
-																	}}
-																>
-																	Size
-																</DropdownMenuItem>
-																<DropdownMenuItem
-																	isSelected={!!margin}
-																	onClick={() => {
-																		toggleMargin();
-																		toggle();
-																	}}
-																>
-																	Margin
-																</DropdownMenuItem>
-																<DropdownMenuItem
-																	isSelected={!!padding}
-																	onClick={() => {
-																		togglePadding();
-																		toggle();
-																	}}
-																>
-																	Padding
-																</DropdownMenuItem>
-																<DropdownMenuItem
-																	isSelected={!!overflow}
-																	onClick={() => {
-																		toggleOverflow();
-																		toggle();
-																	}}
-																>
-																	Overflow
-																</DropdownMenuItem>
-															</DropdownMenu>
-														</>
-													)}
-												</Dropdown>
-											</HStack>
-											<FormGroup label="Size">
-												<Grid align="center" gap={2}>
-													<UnitInput
-														prefix={<PrefixText>W</PrefixText>}
-														gap={1.5}
-														cssProp="width"
-														value={width}
-														min={0}
-														onChange={setAttribute("width")}
-													/>
+						<View>
+							<ContainerCard>
+								<LayoutSection />
+								<SectionSeparator />
 
-													<UnitInput
-														prefix={<PrefixText>H</PrefixText>}
-														gap={1.5}
-														value={height}
-														cssProp="height"
-														min={0}
-														onChange={setAttribute("height")}
-													/>
-												</Grid>
-											</FormGroup>
+								<StackSection />
+								<SectionSeparator />
 
-											{margin && <BoxControl label="Margin" value="margin" />}
+								<TypographySection />
+								<SectionSeparator />
 
-											{padding && (
-												<BoxControl label="Padding" value="padding" min={0} />
-											)}
+								<StylesSection />
+								<SectionSeparator />
 
-											{!_.isNil(overflow) && (
-												<FormGroup label="Overflow">
-													<SegmentedControl
-														value={overflow}
-														options={overflowOptions}
-														onChange={setAttribute("overflow")}
-													/>
-												</FormGroup>
-											)}
-										</ListGroup>
-										<View>
-											<Separator css={{ opacity: 0.6 }} />
-										</View>
-										<ListGroup>
-											<HStack spacing={3}>
-												<AppIcon icon={<FiTrello />} color="yellow" />
-												<Text weight={600}>Stack</Text>
-												<FlexBlock />
-												<Button
-													size="small"
-													icon={stackIcon}
-													isSubtle
-													isControl
-													onClick={toggleStack}
-												/>
-											</HStack>
-											{hasStack && (
-												<>
-													<FormGroup label="Direction">
-														<SegmentedControl
-															value={stack?.flexDirection}
-															options={flexDirectionOptions}
-															onChange={setAttribute("stack.flexDirection")}
-														/>
-													</FormGroup>
-													<FormGroup label="Align">
-														<SelectDropdown
-															isPreviewable
-															minWidth={160}
-															onChange={(next) =>
-																setAttribute("stack.alignItems")(
-																	next.selectedItem
-																)
-															}
-															value={stack?.alignItems}
-															options={alignItemsOptions}
-														/>
-													</FormGroup>
-													<FormGroup label="Distribution">
-														<SelectDropdown
-															minWidth={160}
-															isPreviewable
-															onChange={(next) =>
-																setAttribute("stack.justifyContent")(
-																	next.selectedItem
-																)
-															}
-															value={stack?.justifyContent}
-															options={justifyContentOptions}
-														/>
-													</FormGroup>
-													<FormGroup label="Gap">
-														<UnitSliderInput
-															value={stack?.gap}
-															min={0}
-															onChange={setAttribute("stack.gap")}
-														/>
-													</FormGroup>
-												</>
-											)}
-										</ListGroup>
-										<View>
-											<Separator css={{ opacity: 0.6 }} />
-										</View>
-										<ListGroup>
-											<HStack spacing={3}>
-												<AppIcon icon={<FiType />} color="pink" />
-												<Text weight={600}>Typography</Text>
-												<FlexBlock />
-												<Dropdown placement="bottom-end">
-													{({ toggle }) => (
-														<>
-															<DropdownTrigger
-																size="small"
-																icon={<FiMoreHorizontal />}
-																isSubtle
-																isControl
-															/>
-															<DropdownMenu minWidth={160} maxWidth={160}>
-																<DropdownMenuItem
-																	onClick={() => {
-																		toggle();
-																	}}
-																>
-																	Font Family
-																</DropdownMenuItem>
-															</DropdownMenu>
-														</>
-													)}
-												</Dropdown>
-											</HStack>
-										</ListGroup>
-										<View>
-											<Separator css={{ opacity: 0.6 }} />
-										</View>
-										<ListGroup>
-											<HStack spacing={3}>
-												<AppIcon icon={<FiLoader />} color="green" />
-												<Text weight={600}>Styles</Text>
-												<FlexBlock />
-												<Dropdown placement="bottom-end">
-													<DropdownTrigger
-														size="small"
-														icon={<FiMoreHorizontal />}
-														isSubtle
-														isControl
-													/>
-													<DropdownMenu minWidth={120}>
-														<DropdownMenuItem>Background</DropdownMenuItem>
-														<DropdownMenuItem>Border</DropdownMenuItem>
-													</DropdownMenu>
-												</Dropdown>
-											</HStack>
-										</ListGroup>
-										<View>
-											<Separator css={{ opacity: 0.6 }} />
-										</View>
-										<ListGroup>
-											<HStack spacing={3}>
-												<AppIcon icon={<FiAperture />} color="indigo" />
-												<Text weight={600}>Effects</Text>
-												<FlexBlock />
-												<Dropdown
-													placement="bottom-end"
-													minWidth={160}
-													maxWidth={160}
-												>
-													{({ toggle }) => (
-														<>
-															<DropdownTrigger
-																size="small"
-																icon={<FiMoreHorizontal />}
-																isSubtle
-																isControl
-															/>
-															<DropdownMenu minWidth={120}>
-																<DropdownMenuItem
-																	isSelected={!_.isNil(opacity)}
-																	onClick={() => {
-																		toggleOpacity();
-																		toggle();
-																	}}
-																>
-																	Opacity
-																</DropdownMenuItem>
-																<DropdownMenuItem
-																	isSelected={!_.isNil(blur)}
-																	onClick={() => {
-																		toggleBlur();
-																		toggle();
-																	}}
-																>
-																	Blur
-																</DropdownMenuItem>
-															</DropdownMenu>
-														</>
-													)}
-												</Dropdown>
-											</HStack>
-											{!_.isNil(opacity) && (
-												<FormGroup label="Opacity">
-													<TextSliderInput
-														type="number"
-														min={0}
-														max={100}
-														value={opacity}
-														suffix={<PrefixText>%</PrefixText>}
-														onChange={setAttribute("opacity")}
-													/>
-												</FormGroup>
-											)}
-											{!_.isNil(blur) && (
-												<FormGroup label="Blur">
-													<UnitSliderInput
-														min={0}
-														max={100}
-														value={blur}
-														sliderMax={20}
-														onChange={setAttribute("blur")}
-													/>
-												</FormGroup>
-											)}
-										</ListGroup>
-										<View />
-									</VStack>
-								</CardBody>
-							</Card>
-						</Container>
+								<EffectsSection />
+							</ContainerCard>
+						</View>
 					</Grid>
 				</Container>
 			</ContextSystemProvider>
