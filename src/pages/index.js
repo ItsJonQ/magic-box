@@ -1,6 +1,5 @@
 import Head from "next/head";
 import {
-	FormGroup,
 	Container,
 	Grid,
 	Card,
@@ -304,7 +303,7 @@ function EffectsSection() {
 					{({ toggle }) => (
 						<>
 							<DropdownTrigger icon={<FiMoreHorizontal />} />
-							<DropdownMenu minWidth={120}>
+							<DropdownMenu>
 								<DropdownMenuItem
 									isSelected={!_.isNil(opacity)}
 									onClick={() => {
