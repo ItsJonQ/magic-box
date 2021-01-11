@@ -1,12 +1,14 @@
+import { flexAlignment, useAppStore } from "@lib/appStore";
+
 import React from "react";
-import { ui } from "@wp-g2/styles";
 import _ from "lodash";
-import { useAppStore, flexAlignment } from "@lib/appStore";
+import { ui } from "@wp-g2/styles";
 
 export function MagicBox(props) {
 	const { attributes } = useAppStore();
 	const {
 		blur,
+		font,
 		opacity,
 		height,
 		margin,
@@ -14,15 +16,21 @@ export function MagicBox(props) {
 		padding,
 		overflow,
 		stack,
+		textAlign,
+		textDecoration,
 	} = attributes;
 
 	const style = {
-		"--mb--ai": flexAlignment[stack?.alignItems?.value],
-		"--mb--blr": blur,
+		"--mb--fx-blr": blur,
 		"--mb--d": stack?.display,
-		"--mb--fxd": stack?.flexDirection,
+		"--mb--flx-ai": flexAlignment[stack?.alignItems?.value],
+		"--mb--flx-d": stack?.flexDirection,
+		"--mb--flx-jc": flexAlignment[stack?.justifyContent?.value],
+		"--mb--flx-sp": ui.value.px(stack?.gap),
+		"--mb--ftf": font?.family,
+		"--mb--fts": font?.size,
+		"--mb--ftw": font?.weight?.value,
 		"--mb--h": height,
-		"--mb--jc": flexAlignment[stack?.justifyContent?.value],
 		"--mb--mt": margin?.top,
 		"--mb--mb": margin?.bottom,
 		"--mb--ml": margin?.left,
@@ -33,8 +41,9 @@ export function MagicBox(props) {
 		"--mb--pr": padding?.right,
 		"--mb--op": _.isNil(opacity) ? null : opacity / 100,
 		"--mb--ov": overflow,
+		"--mb--txa": textAlign,
+		"--mb--txd": textDecoration,
 		"--mb--w": width,
-		"--mb-ms--sp": ui.value.px(stack?.gap),
 		outline: "2px solid rgba(0, 0, 255, 0.1)",
 	};
 

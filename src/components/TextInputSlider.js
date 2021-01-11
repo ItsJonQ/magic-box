@@ -1,5 +1,6 @@
+import { Grid, Slider, TextInput } from "@wp-g2/components";
+
 import React from "react";
-import { Grid, TextInput, Slider } from "@wp-g2/components";
 
 export function TextInputSlider({ type, value, onChange, ...props }) {
 	return (

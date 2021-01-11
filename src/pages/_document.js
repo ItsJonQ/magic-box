@@ -1,6 +1,7 @@
-import Document, { Html, Head, Main, NextScript } from "next/document";
-import createEmotionServer from "create-emotion-server";
+import Document, { Head, Html, Main, NextScript } from "next/document";
+
 import { cache } from "@wp-g2/styles";
+import createEmotionServer from "create-emotion-server";
 
 const { extractCritical } = createEmotionServer(cache);
 

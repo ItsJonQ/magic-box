@@ -11,12 +11,15 @@ body {
 }
 
 [data-magic-box][data-magic-box][data-magic-box] {
-	align-items: var(--mb--ai);
+	align-items: var(--mb--flx-ai);
+	font-family: var(--mb--ftf);
+	font-size: var(--mb--fts);
+	font-weight: var(--mb--ftw);
 	filter: blur(var(--mb--blr));
 	display: var(--mb--d, block);
-	flex-direction: var(--mb--fxd);
+	flex-direction: var(--mb--flx-d);
 	height: var(--mb--h);
-	justify-content: var(--mb--jc);
+	justify-content: var(--mb--flx-jc);
 	margin-bottom: var(--mb--mb);
 	margin-left: var(--mb--ml);
 	margin-right: var(--mb--mr);
@@ -27,11 +30,13 @@ body {
 	padding-left: var(--mb--pl);
 	padding-right: var(--mb--pr);
 	padding-top: var(--mb--pt);
+	text-align: var(--mb--txa);
+	text-decoration: var(--mb--txd);
 	width: var(--mb--w);
 }
 
 [data-magic-box][data-magic-box][data-magic-box][data-magic-stack="row"] > * {
-	margin-right: var(--mb-ms--sp);
+	margin-right: var(--mb--flx-sp);
 }
 
 [data-magic-box][data-magic-box][data-magic-box][data-magic-stack="row"]
@@ -41,7 +46,7 @@ body {
 
 [data-magic-box][data-magic-box][data-magic-box][data-magic-stack="column"]
 	> * {
-	margin-bottom: var(--mb-ms--sp);
+	margin-bottom: var(--mb--flx-sp);
 }
 
 [data-magic-box][data-magic-box][data-magic-box][data-magic-stack="column"]

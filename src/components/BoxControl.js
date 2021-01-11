@@ -1,15 +1,16 @@
-import { FormGroup, Grid, UnitInput, Icon } from "@wp-g2/components";
-import { ui } from "@wp-g2/styles";
 import {
-	FiArrowUp,
 	FiArrowDown,
 	FiArrowLeft,
 	FiArrowRight,
+	FiArrowUp,
 } from "react-icons/fi";
-import { useAppStore } from "@lib/appStore";
+import { Grid, Icon, UnitInput } from "@wp-g2/components";
+
+import { PrefixText } from "./PrefixText";
 import React from "react";
 import { SectionFormGroup } from "./SectionFormGroup";
-import { PrefixText } from "./PrefixText";
+import { ui } from "@wp-g2/styles";
+import { useAppStore } from "@lib/appStore";
 
 export function BoxControl({ label, value, ...otherProps }) {
 	const { attributes: _attributes, setAttribute } = useAppStore();

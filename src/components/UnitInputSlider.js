@@ -1,5 +1,6 @@
+import { Grid, Slider, UnitInput } from "@wp-g2/components";
+
 import React from "react";
-import { Grid, UnitInput, Slider } from "@wp-g2/components";
 
 export function UnitInputSlider({
 	type,

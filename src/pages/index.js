@@ -1,36 +1,3 @@
-import Head from "next/head";
-import {
-	Container,
-	Grid,
-	Card,
-	CardBody,
-	Button,
-	ListGroup,
-	SegmentedControl,
-	SelectDropdown,
-	Dropdown,
-	DropdownTrigger,
-	DropdownMenu,
-	DropdownMenuItem,
-	HStack,
-	VStack,
-	FlexBlock,
-	UnitInput,
-	Separator,
-	Text,
-	View,
-} from "@wp-g2/components";
-import {
-	FiMoreHorizontal,
-	FiLayout,
-	FiTrello,
-	FiType,
-	FiLoader,
-	FiAperture,
-	FiPlus,
-	FiMinus,
-} from "react-icons/fi";
-import { ui } from "@wp-g2/styles";
 import {
 	BoxControl,
 	ContextSystemProvider,
@@ -41,14 +8,55 @@ import {
 	TextInputSlider,
 	UnitInputSlider,
 } from "@components/index";
-import _ from "lodash";
+import {
+	Button,
+	Card,
+	CardBody,
+	Container,
+	Dropdown,
+	DropdownMenu,
+	DropdownMenuItem,
+	DropdownTrigger,
+	FlexBlock,
+	Grid,
+	HStack,
+	Icon,
+	ListGroup,
+	SegmentedControl,
+	SelectDropdown,
+	Separator,
+	Text,
+	TextInput,
+	Tooltip,
+	UnitInput,
+	VStack,
+	View,
+} from "@wp-g2/components";
+import { CgFontHeight, CgFontSpacing } from "react-icons/cg";
+import {
+	FiAperture,
+	FiLayout,
+	FiLoader,
+	FiMinus,
+	FiMoreHorizontal,
+	FiPlus,
+	FiTrello,
+	FiType,
+} from "react-icons/fi";
 import {
 	alignItemsOptions,
 	flexDirectionOptions,
+	fontAlignOptions,
+	fontDecorationOptions,
+	fontWeightOptions,
 	justifyContentOptions,
 	overflowOptions,
 	useAppStore,
 } from "@lib/appStore";
+
+import Head from "next/head";
+import _ from "lodash";
+import { ui } from "@wp-g2/styles";
 
 function LayoutSection() {
 	const {
@@ -167,7 +175,6 @@ function StackSection() {
 	const { stack } = attributes;
 
 	const hasStack = getHasAttribute("stack");
-
 	const stackIcon = !hasStack ? <FiPlus /> : <FiMinus />;
 
 	return (
@@ -229,6 +236,29 @@ function StackSection() {
 }
 
 function TypographySection() {
+	const {
+		attributes,
+		setAttribute,
+		getHasAttribute,
+		toggleFont,
+		toggleLetterSpacing,
+		toggleTextAlign,
+		toggleTextDecoration,
+	} = useAppStore();
+
+	const {
+		font,
+		lineHeight,
+		letterSpacing,
+		textAlign,
+		textDecoration,
+	} = attributes;
+
+	const hasFont = getHasAttribute("font");
+	const hasLetterSpacing = getHasAttribute("letterSpacing");
+	const hasTextAlign = getHasAttribute("textAlign");
+	const hasTextDecoration = getHasAttribute("textDecoration");
+
 	return (
 		<ListGroup>
 			<HStack spacing={3}>
@@ -241,17 +271,126 @@ function TypographySection() {
 							<DropdownTrigger icon={<FiMoreHorizontal />} />
 							<DropdownMenu>
 								<DropdownMenuItem
+									isSelected={hasFont}
 									onClick={() => {
 										toggle();
+										toggleFont();
 									}}
 								>
-									Font Family
+									Font
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									isSelected={hasLetterSpacing}
+									onClick={() => {
+										toggle();
+										toggleLetterSpacing();
+									}}
+								>
+									Spacing
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									isSelected={hasTextAlign}
+									onClick={() => {
+										toggle();
+										toggleTextAlign();
+									}}
+								>
+									Align
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									isSelected={hasTextDecoration}
+									onClick={() => {
+										toggle();
+										toggleTextDecoration();
+									}}
+								>
+									Decoration
 								</DropdownMenuItem>
 							</DropdownMenu>
 						</>
 					)}
 				</Dropdown>
 			</HStack>
+			{hasFont && (
+				<SectionFormGroup label="Font">
+					<VStack spacing={1}>
+						<TextInput
+							value={font?.family}
+							onChange={setAttribute("font.family")}
+						/>
+						<Grid gap={2}>
+							<SelectDropdown
+								isPreviewable
+								minWidth={160}
+								onChange={(next) =>
+									setAttribute("font.weight")(next.selectedItem)
+								}
+								value={font?.weight}
+								options={fontWeightOptions}
+							/>
+							<UnitInput
+								value={font?.size}
+								onChange={setAttribute("font.size")}
+							/>
+						</Grid>
+					</VStack>
+				</SectionFormGroup>
+			)}
+
+			{hasLetterSpacing && (
+				<SectionFormGroup label="Spacing">
+					<Grid gap={2}>
+						<UnitInput
+							onChange={setAttribute("lineHeight")}
+							value={lineHeight}
+							step={0.1}
+							prefix={
+								<PrefixText>
+									<Tooltip content="Line Height">
+										<View>
+											<Icon icon={<CgFontHeight />} size={10} />
+										</View>
+									</Tooltip>
+								</PrefixText>
+							}
+						/>
+						<UnitInput
+							onChange={setAttribute("letterSpacing")}
+							value={letterSpacing}
+							step={0.1}
+							prefix={
+								<PrefixText>
+									<Tooltip content="Letter Spacing">
+										<View>
+											<Icon icon={<CgFontSpacing />} size={10} />
+										</View>
+									</Tooltip>
+								</PrefixText>
+							}
+						/>
+					</Grid>
+				</SectionFormGroup>
+			)}
+
+			{hasTextAlign && (
+				<SectionFormGroup label="Align">
+					<SegmentedControl
+						options={fontAlignOptions}
+						value={textAlign}
+						onChange={setAttribute("textAlign")}
+					/>
+				</SectionFormGroup>
+			)}
+
+			{hasTextDecoration && (
+				<SectionFormGroup label="Decoration">
+					<SegmentedControl
+						options={fontDecorationOptions}
+						value={textDecoration}
+						onChange={setAttribute("textDecoration")}
+					/>
+				</SectionFormGroup>
+			)}
 		</ListGroup>
 	);
 }

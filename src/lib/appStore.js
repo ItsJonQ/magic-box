@@ -1,14 +1,28 @@
-import { createStore } from "@wp-g2/substate";
+import { AiOutlineStrikethrough, AiOutlineUnderline } from "react-icons/ai";
+import {
+	BsJustify,
+	BsTextCenter,
+	BsTextLeft,
+	BsTextRight,
+} from "react-icons/bs";
+
+import { BiFont } from "react-icons/bi";
+import { Icon } from "@wp-g2/components";
 import _ from "lodash";
+import { createStore } from "@wp-g2/substate";
 
 export const appStore = createStore((set, get) => ({
 	attributes: {
+		font: null,
 		height: "auto",
-		width: "auto",
-		overflow: null,
+		letterSpacing: null,
+		lineHeight: null,
 		margin: null,
+		overflow: null,
 		padding: null,
 		stack: null,
+		textDecoration: null,
+		width: "auto",
 	},
 
 	// Setters
@@ -69,6 +83,31 @@ export const appStore = createStore((set, get) => ({
 		toggleAttribute("overflow", next);
 	},
 
+	toggleFont: () => {
+		const { toggleAttribute } = get();
+		const next = { ...{}, ...defaultFontAttributes };
+		toggleAttribute("font", next);
+	},
+
+	toggleLetterSpacing: () => {
+		const { toggleAttribute } = get();
+		const next = "0";
+		toggleAttribute("letterSpacing", "0");
+		toggleAttribute("lineHeight", "1.6%");
+	},
+
+	toggleTextDecoration: () => {
+		const { toggleAttribute } = get();
+		const next = "none";
+		toggleAttribute("textDecoration", next);
+	},
+
+	toggleTextAlign: () => {
+		const { toggleAttribute } = get();
+		const next = "left";
+		toggleAttribute("textAlign", next);
+	},
+
 	toggleBlur: () => {
 		const { toggleAttribute } = get();
 		const next = 0;
@@ -112,26 +151,93 @@ export const flexDirectionOptions = [
 	},
 ];
 
+export const fontAlignOptions = [
+	{
+		label: <Icon icon={<BsTextLeft />} size={14} aria-label="Left" />,
+		value: "left",
+	},
+	{
+		label: <Icon icon={<BsTextCenter />} size={14} aria-label="Center" />,
+		value: "center",
+	},
+	{
+		label: <Icon icon={<BsTextRight />} size={14} aria-label="Right" />,
+		value: "right",
+	},
+	{
+		label: <Icon icon={<BsJustify />} size={14} aria-label="Justify" />,
+		value: "justify",
+	},
+];
+
+export const fontDecorationOptions = [
+	{
+		label: <Icon icon={<BiFont />} size={14} aria-label="None" />,
+		value: "none",
+	},
+	{
+		label: (
+			<Icon icon={<AiOutlineUnderline />} size={14} aria-label="Underline" />
+		),
+		value: "underline",
+	},
+	{
+		label: (
+			<Icon
+				icon={<AiOutlineStrikethrough />}
+				size={14}
+				aria-label="Line Through"
+			/>
+		),
+		value: "line-through",
+	},
+];
+
+export const fontWeightOptions = [
+	{
+		label: "100",
+		value: 100,
+	},
+	{
+		label: "200",
+		value: 200,
+	},
+	{
+		label: "300",
+		value: 300,
+	},
+	{
+		label: "400",
+		value: 400,
+	},
+	{
+		label: "500",
+		value: 500,
+	},
+	{
+		label: "600",
+		value: 600,
+	},
+	{
+		label: "700",
+		value: 700,
+	},
+	{
+		label: "800",
+		value: 800,
+	},
+	{
+		label: "900",
+		value: 900,
+	},
+];
+
 export const defaultStackAttributes = {
 	display: "flex",
 	alignItems: alignItemsOptions[1],
 	justifyContent: justifyContentOptions[1],
 	flexDirection: "row",
 	gap: "10px",
-};
-
-export const defaultPaddingAttributes = {
-	top: "0px",
-	bottom: "0px",
-	left: "0px",
-	right: "0px",
-};
-
-export const defaultMarginAttributes = {
-	top: "0px",
-	bottom: "0px",
-	left: "0px",
-	right: "0px",
 };
 
 export const overflowOptions = [
@@ -151,4 +257,24 @@ export const flexAlignment = {
 	end: "flex-end",
 	top: "flex-start",
 	bottom: "flex-end",
+};
+
+export const defaultFontAttributes = {
+	family: "system-ui",
+	size: "13px",
+	weight: fontWeightOptions[3],
+};
+
+export const defaultPaddingAttributes = {
+	top: "0px",
+	bottom: "0px",
+	left: "0px",
+	right: "0px",
+};
+
+export const defaultMarginAttributes = {
+	top: "0px",
+	bottom: "0px",
+	left: "0px",
+	right: "0px",
 };

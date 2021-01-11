@@ -1,8 +1,9 @@
-import _ from "lodash";
-import { FiLayers } from "react-icons/fi";
-import { ui } from "@wp-g2/styles";
 import { Icon, View } from "@wp-g2/components";
+
+import { FiLayers } from "react-icons/fi";
 import React from "react";
+import _ from "lodash";
+import { ui } from "@wp-g2/styles";
 
 export function SoftIcon({ icon = <FiLayers />, color = "green" }) {
 	return (
