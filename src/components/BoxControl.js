@@ -25,7 +25,6 @@ export function BoxControl({ label, value, ...otherProps }) {
 			>
 				<UnitInput
 					gap={1}
-					arrows
 					value={attributes?.top}
 					onChange={setAttribute(`${value}.top`)}
 					cssProp={value}
@@ -38,7 +37,6 @@ export function BoxControl({ label, value, ...otherProps }) {
 				/>
 				<UnitInput
 					gap={1}
-					arrows
 					value={attributes?.bottom}
 					onChange={setAttribute(`${value}.bottom`)}
 					cssProp={value}
@@ -51,7 +49,6 @@ export function BoxControl({ label, value, ...otherProps }) {
 				/>
 				<UnitInput
 					gap={1}
-					arrows
 					cssProp={value}
 					value={attributes?.left}
 					onChange={setAttribute(`${value}.left`)}
@@ -64,7 +61,6 @@ export function BoxControl({ label, value, ...otherProps }) {
 				/>
 				<UnitInput
 					gap={1}
-					arrows
 					cssProp={value}
 					value={attributes?.right}
 					onChange={setAttribute(`${value}.right`)}
