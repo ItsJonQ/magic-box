@@ -93,7 +93,7 @@ export const appStore = createStore((set, get) => ({
 		const { toggleAttribute } = get();
 		const next = "0";
 		toggleAttribute("letterSpacing", "0");
-		toggleAttribute("lineHeight", "1.6%");
+		toggleAttribute("lineHeight", "1.6em");
 	},
 
 	toggleTextDecoration: () => {

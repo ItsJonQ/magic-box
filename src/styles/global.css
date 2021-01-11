@@ -12,14 +12,16 @@ body {
 
 [data-magic-box][data-magic-box][data-magic-box] {
 	align-items: var(--mb--flx-ai);
+	display: var(--mb--d, block);
+	filter: blur(var(--mb--blr));
+	flex-direction: var(--mb--flx-d);
 	font-family: var(--mb--ftf);
 	font-size: var(--mb--fts);
 	font-weight: var(--mb--ftw);
-	filter: blur(var(--mb--blr));
-	display: var(--mb--d, block);
-	flex-direction: var(--mb--flx-d);
 	height: var(--mb--h);
 	justify-content: var(--mb--flx-jc);
+	letter-spacing: var(--mb--ls);
+	line-height: var(--mb--lh);
 	margin-bottom: var(--mb--mb);
 	margin-left: var(--mb--ml);
 	margin-right: var(--mb--mr);

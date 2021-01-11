@@ -329,6 +329,7 @@ function TypographySection() {
 								options={fontWeightOptions}
 							/>
 							<UnitInput
+								cssProp="fontSize"
 								value={font?.size}
 								onChange={setAttribute("font.size")}
 							/>
@@ -341,8 +342,10 @@ function TypographySection() {
 				<SectionFormGroup label="Spacing">
 					<Grid gap={2}>
 						<UnitInput
+							cssProp="lineHeight"
 							onChange={setAttribute("lineHeight")}
 							value={lineHeight}
+							min={_}
 							step={0.1}
 							prefix={
 								<PrefixText>
@@ -355,6 +358,7 @@ function TypographySection() {
 							}
 						/>
 						<UnitInput
+							cssProp="letterSpacing"
 							onChange={setAttribute("letterSpacing")}
 							value={letterSpacing}
 							step={0.1}
