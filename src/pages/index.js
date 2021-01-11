@@ -1,5 +1,6 @@
 import {
 	BoxControl,
+	ClientRender,
 	ContextSystemProvider,
 	MagicBox,
 	PrefixText,
@@ -554,21 +555,23 @@ export default function Home() {
 							<DemoContent />
 						</View>
 						<View>
-							<ContainerCard>
-								<LayoutSection />
-								<SectionSeparator />
+							<ClientRender>
+								<ContainerCard>
+									<LayoutSection />
+									<SectionSeparator />
 
-								<StackSection />
-								<SectionSeparator />
+									<StackSection />
+									<SectionSeparator />
 
-								<TypographySection />
-								<SectionSeparator />
+									<TypographySection />
+									<SectionSeparator />
 
-								<StylesSection />
-								<SectionSeparator />
+									<StylesSection />
+									<SectionSeparator />
 
-								<EffectsSection />
-							</ContainerCard>
+									<EffectsSection />
+								</ContainerCard>
+							</ClientRender>
 						</View>
 					</Grid>
 				</Container>
