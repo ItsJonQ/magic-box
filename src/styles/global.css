@@ -13,7 +13,7 @@ body {
 [data-magic-box][data-magic-box][data-magic-box] {
 	align-items: var(--mb--flx-ai);
 	display: var(--mb--d, block);
-	filter: blur(var(--mb--blr));
+	filter: blur(var(--mb--fx-blr));
 	flex-direction: var(--mb--flx-d);
 	font-family: var(--mb--ftf);
 	font-size: var(--mb--fts);
