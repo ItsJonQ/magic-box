@@ -123,6 +123,7 @@ function LayoutSection() {
 				<Grid align="center" gap={2}>
 					<UnitInput
 						prefix={<PrefixText>W</PrefixText>}
+						arrows
 						gap={1.5}
 						cssProp="width"
 						value={width}
@@ -131,6 +132,7 @@ function LayoutSection() {
 					/>
 					<UnitInput
 						prefix={<PrefixText>H</PrefixText>}
+						arrows
 						gap={1.5}
 						value={height}
 						cssProp="height"

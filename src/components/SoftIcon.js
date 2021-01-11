@@ -8,10 +8,10 @@ export function SoftIcon({ icon = <FiLayers />, color = "green" }) {
 	return (
 		<View
 			css={{
-				borderRadius: 8,
-				width: 30,
-				height: 30,
-				padding: 8,
+				borderRadius: 6,
+				width: 24,
+				height: 24,
+				padding: 5,
 				backgroundColor: ui.get(`color${_.upperFirst(color)}50`),
 				color: ui.get(`color${_.upperFirst(color)}500`),
 			}}

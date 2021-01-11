@@ -2,6 +2,7 @@ import React from "react";
 import { Grid, UnitInput, Slider } from "@wp-g2/components";
 
 export function UnitInputSlider({
+	arrows = true,
 	type,
 	value,
 	onChange,
@@ -14,6 +15,7 @@ export function UnitInputSlider({
 	return (
 		<Grid gap={2}>
 			<UnitInput
+				arrows={arrows}
 				type={type}
 				value={value}
 				onChange={onChange}
