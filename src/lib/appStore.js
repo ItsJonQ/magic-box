@@ -9,7 +9,7 @@ import {
 import { BiFont } from "react-icons/bi";
 import { Icon } from "@wp-g2/components";
 import _ from "lodash";
-import { createStore } from "@wp-g2/substate";
+import createStore from "zustand";
 
 export const appStore = createStore((set, get) => ({
 	attributes: {
