@@ -22,6 +22,7 @@ import {
 	Icon,
 	VStack,
 	ListGroup,
+	Scrollable,
 	ListGroupHeader,
 	ListGroups,
 	TextInput,
@@ -34,7 +35,7 @@ import { useDrag } from "react-use-gesture";
 import { FiPlus, FiChevronDown } from "react-icons/fi";
 import colorize from "tinycolor2";
 import { v4 as uuid } from "uuid";
-import { AngleInput } from "components/index";
+import { AngleInput, ClientRender } from "components/index";
 
 import Head from "next/head";
 import _ from "lodash";
@@ -92,7 +93,7 @@ const ColorStop = ({
 	return (
 		<Grid
 			alignment="center"
-			templateColumns="24px 1fr 1fr 20px"
+			templateColumns="24px minmax(0,1fr) 1fr 20px"
 			onClick={onClick}
 			css={{
 				borderRadius: 4,
@@ -102,7 +103,9 @@ const ColorStop = ({
 		>
 			<ColorCircle color={color} onClick={onClick} />
 			<View>
-				<Text>{label}</Text>
+				<Text truncate title={label}>
+					{label}
+				</Text>
 			</View>
 			<View css={{ maxWidth: 60 }}>
 				<TextInput
@@ -245,6 +248,78 @@ const AngleControl = ({ value, onChange }) => {
 	);
 };
 
+const RadialControl = ({ rx = 50, ry = 50, onChange }) => {
+	const handleOnChange = (coord) => (next) => {
+		const nextState = { rx, ry };
+		nextState[coord] = next;
+		onChange(nextState);
+	};
+
+	return (
+		<Grid>
+			<TextInput
+				value={rx}
+				onChange={handleOnChange("rx")}
+				min={0}
+				max={100}
+				type="number"
+				prefix={
+					<Text size={10} variant="muted">
+						X
+					</Text>
+				}
+				suffix={
+					<View>
+						<Text size={10} variant="muted" css={{ marginLeft: -8 }}>
+							%
+						</Text>
+					</View>
+				}
+			/>
+			<TextInput
+				value={ry}
+				onChange={handleOnChange("ry")}
+				min={0}
+				max={100}
+				type="number"
+				prefix={
+					<Text size={10} variant="muted">
+						Y
+					</Text>
+				}
+				suffix={
+					<View>
+						<Text size={10} variant="muted" css={{ marginLeft: -8 }}>
+							%
+						</Text>
+					</View>
+				}
+			/>
+		</Grid>
+	);
+};
+
+function getGradientStyle({
+	gradientType = "linear",
+	colors = [],
+	deg,
+	rx = 50,
+	ry = 50,
+}) {
+	const sortedColors = _.sortBy(colors, "stop");
+	const gradientValues = sortedColors
+		.map((color) => {
+			return `${color.color} ${color.stop}%`;
+		})
+		.join(",");
+
+	const isLinearGradient = gradientType === "linear";
+	const linearGradient = `linear-gradient(${deg}deg, ${gradientValues})`;
+	const radialGradient = `radial-gradient(circle at ${rx}% ${ry}%, ${gradientValues})`;
+
+	return isLinearGradient ? linearGradient : radialGradient;
+}
+
 const GradientColorPicker = () => {
 	const [colors, setColors] = React.useState([
 		{ color: "red", stop: 20, id: uuid() },
@@ -252,10 +327,19 @@ const GradientColorPicker = () => {
 	]);
 	const [currentId, setCurrentId] = React.useState(colors[0].id);
 	const [deg, setDeg] = React.useState(90);
+	const [rx, setRx] = React.useState(50);
+	const [ry, setRy] = React.useState(50);
+	const [gradientType, setGradientType] = React.useState("radial");
 
 	const getCurrentColor = (colorState = colors, id = currentId) =>
 		colorState.find((c) => c.id === id);
 	const currentColor = getCurrentColor()?.color;
+
+	const handleOnChangeGradientType = (next) => {
+		setGradientType(next);
+		handleOnChangeRxRy({ rx: 50, ry: 50 });
+		setDeg(90);
+	};
 
 	const handleOnChange = (next) =>
 		setColors((prev) => {
@@ -277,6 +361,11 @@ const GradientColorPicker = () => {
 			return nextState;
 		});
 
+	const handleOnChangeRxRy = (next) => {
+		setRx(next.rx);
+		setRy(next.ry);
+	};
+
 	const sortedColors = _.sortBy(colors, "stop");
 
 	const gradientValues = sortedColors
@@ -285,7 +374,13 @@ const GradientColorPicker = () => {
 		})
 		.join(",");
 	const linearGradientBar = `linear-gradient(90deg, ${gradientValues})`;
-	const linearGradient = `linear-gradient(${deg}deg, ${gradientValues})`;
+	const linearGradient = getGradientStyle({
+		gradientType,
+		colors,
+		deg,
+		rx,
+		ry,
+	});
 
 	const addStop = (event) => {
 		const { pageX: px } = event;
@@ -311,10 +406,23 @@ const GradientColorPicker = () => {
 		setCurrentId(nextId);
 	};
 
+	const isLinearGradient = gradientType === "linear";
+
 	return (
 		<VStack>
 			<Collapsible>
 				<VStack spacing={3}>
+					<Select
+						size="small"
+						isSubtle
+						isControl
+						options={[
+							{ label: "Linear", value: "linear" },
+							{ label: "Radial", value: "radial" },
+						]}
+						value={gradientType}
+						onChange={handleOnChangeGradientType}
+					/>
 					<View
 						css={{
 							height: 24,
@@ -340,7 +448,11 @@ const GradientColorPicker = () => {
 					</View>
 					<HStack>
 						<View>
-							<AngleControl value={deg} onChange={setDeg} />
+							{isLinearGradient ? (
+								<AngleControl value={deg} onChange={setDeg} />
+							) : (
+								<RadialControl rx={rx} ry={ry} onChange={handleOnChangeRxRy} />
+							)}
 						</View>
 						<Spacer />
 						<Tooltip content="Show Gradient Stops">
@@ -358,38 +470,42 @@ const GradientColorPicker = () => {
 				</VStack>
 				<CollapsibleContent>
 					<Spacer pt={5} m={0} />
-					<Spacer>
-						<Grid alignment="center" templateColumns="24px 1fr 1fr 20px">
-							<div />
-							<Text variant="muted" weight={600}>
-								Color
-							</Text>
-							<Text variant="muted" weight={600}>
-								Stop
-							</Text>
-						</Grid>
-					</Spacer>
-					{sortedColors.map((color, index) => (
-						<div key={index}>
-							<ColorStop
-								{...color}
-								isSelected={currentId === color.id}
-								onClick={() => setCurrentId(color.id)}
-								onChangeStop={handleOnChangeColorStop(color.id)}
-								onRemove={handleOnRemove(color.id)}
-								showRemove={colors.length > 1}
-							/>
-						</div>
-					))}
+					<Scrollable css={{ maxHeight: 200 }}>
+						<Spacer>
+							<Grid alignment="center" templateColumns="24px 1fr 1fr 20px">
+								<div />
+								<Text variant="muted" weight={600}>
+									Color
+								</Text>
+								<Text variant="muted" weight={600}>
+									Stop
+								</Text>
+							</Grid>
+						</Spacer>
+						{sortedColors.map((color, index) => (
+							<div key={index}>
+								<ColorStop
+									{...color}
+									isSelected={currentId === color.id}
+									onClick={() => setCurrentId(color.id)}
+									onChangeStop={handleOnChangeColorStop(color.id)}
+									onRemove={handleOnRemove(color.id)}
+									showRemove={colors.length > 1}
+								/>
+							</div>
+						))}
+						<Spacer />
+					</Scrollable>
 				</CollapsibleContent>
 			</Collapsible>
 			<View>
 				<Separator />
 			</View>
-			<ColorPicker color={currentColor} onChange={handleOnChange} />
-			<View>
-				<Separator />
-			</View>
+			<ColorPicker
+				color={currentColor}
+				onChange={handleOnChange}
+				disableAlpha={false}
+			/>
 			<View
 				style={{
 					background: linearGradient,
@@ -466,9 +582,11 @@ export default function Home() {
 				</Head>
 				<View css={{ padding: "10vh 10vw" }}>
 					<HStack alignment="top" spacing={5}>
-						<View>
-							<GradientColorPicker />
-						</View>
+						<Container width={280}>
+							<ClientRender>
+								<GradientColorPicker />
+							</ClientRender>
+						</Container>
 						<Spacer />
 						<Container width={280}>
 							{show && (
