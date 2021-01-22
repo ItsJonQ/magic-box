@@ -112,6 +112,7 @@ const ColorStop = ({
 					value={stop}
 					isCommitOnBlurOrEnter
 					gap={0}
+					key={id}
 					onChange={onChangeStop}
 					onClick={stopProp}
 					key={id}
@@ -183,11 +184,15 @@ const GradientStop = ({
 	return (
 		<View
 			{...gestures()}
+			as="button"
 			onClick={handleOnClick}
 			style={{
 				left: `${stop}%`,
 			}}
 			css={{
+				appearance: "none",
+				border: "none",
+				background: "none",
 				outline: "none",
 				width: 16,
 				cursor: "move",
@@ -429,6 +434,7 @@ const GradientColorPicker = () => {
 							borderRadius: 4,
 							position: "relative",
 							cursor: "copy",
+							boxShadow: "0 0 0 1px rgba(0, 0, 0, 0.1) inset",
 							userSelect: "none",
 						}}
 						style={{ background: linearGradientBar }}
