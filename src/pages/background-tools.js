@@ -12,6 +12,7 @@ import {
 	Grid,
 	FormGroup,
 	ColorPicker,
+	MenuItem,
 	Tooltip,
 	Separator,
 	HStack,
@@ -33,6 +34,7 @@ import { useDrag } from "react-use-gesture";
 import { FiPlus, FiChevronDown } from "react-icons/fi";
 import colorize from "tinycolor2";
 import { v4 as uuid } from "uuid";
+import { AngleInput } from "components/index";
 
 import Head from "next/head";
 import _ from "lodash";
@@ -66,12 +68,13 @@ const ColorStop = ({
 	stop,
 	onRemove,
 	showRemove,
+	isSelected,
 	onClick,
 	id,
 	onChangeStop,
 }) => {
 	const handleOnRemove = (event) => {
-		event.stopPropagation();
+		stopProp(event);
 		onRemove(event);
 	};
 	const isTransparent = colorize(color).getAlpha() === 0;
@@ -82,8 +85,21 @@ const ColorStop = ({
 		label = colorize(color).toHexString();
 	}
 
+	const stopProp = (event) => {
+		event.stopPropagation();
+	};
+
 	return (
-		<Grid alignment="center" templateColumns="24px 1fr 1fr 20px">
+		<Grid
+			alignment="center"
+			templateColumns="24px 1fr 1fr 20px"
+			onClick={onClick}
+			css={{
+				borderRadius: 4,
+				padding: 4,
+				background: isSelected ? "rgba(0, 0, 0, 0.04)" : null,
+			}}
+		>
 			<ColorCircle color={color} onClick={onClick} />
 			<View>
 				<Text>{label}</Text>
@@ -94,6 +110,7 @@ const ColorStop = ({
 					isCommitOnBlurOrEnter
 					gap={0}
 					onChange={onChangeStop}
+					onClick={stopProp}
 					key={id}
 					min={0}
 					type="number"
@@ -111,12 +128,13 @@ const ColorStop = ({
 };
 
 const GradientStop = ({
-	index,
+	id,
 	stop,
 	color,
 	onDrag,
 	onClick,
-	setCurrentIndex,
+	onRemove,
+	setCurrentId,
 }) => {
 	const gestures = useDrag((dragProps) => {
 		const parent = dragProps.event.target.parentElement;
@@ -127,7 +145,7 @@ const GradientStop = ({
 		const mx = (dx / pw) * 100;
 		const stop = Math.round(_.clamp(mx, 0, 100));
 		onDrag(stop);
-		setCurrentIndex(index);
+		setCurrentId(id);
 	}, []);
 
 	const handleOnClick = (event) => {
@@ -138,6 +156,7 @@ const GradientStop = ({
 
 	const handleOnKeyDown = (event) => {
 		const jump = event.shiftKey ? 10 : 1;
+
 		switch (event.key) {
 			case "ArrowLeft":
 				event.preventDefault();
@@ -146,6 +165,14 @@ const GradientStop = ({
 			case "ArrowRight":
 				event.preventDefault();
 				onDrag(_.clamp(stop + jump, 0, 100));
+				break;
+			case "Backspace":
+				event.preventDefault();
+				onRemove();
+				break;
+			case "Delete":
+				event.preventDefault();
+				onRemove();
 				break;
 		}
 	};
@@ -197,25 +224,50 @@ const GradientStop = ({
 	);
 };
 
+const AngleControl = ({ value, onChange }) => {
+	return (
+		<HStack>
+			<AngleInput value={value} onChange={onChange} />
+			<TextInput
+				suffix={
+					<Text size={11} variant="muted">
+						°
+					</Text>
+				}
+				value={value}
+				onChange={onChange}
+				type="number"
+				min={0}
+				max={360}
+				isCommitOnBlurOrEnter
+			/>
+		</HStack>
+	);
+};
+
 const GradientColorPicker = () => {
 	const [colors, setColors] = React.useState([
 		{ color: "red", stop: 20, id: uuid() },
 		{ color: "blue", stop: 80, id: uuid() },
 	]);
-	const [currentIndex, setCurrentIndex] = React.useState(0);
+	const [currentId, setCurrentId] = React.useState(colors[0].id);
+	const [deg, setDeg] = React.useState(90);
 
-	const currentColor = colors[currentIndex].color;
+	const getCurrentColor = (colorState = colors, id = currentId) =>
+		colorState.find((c) => c.id === id);
+	const currentColor = getCurrentColor()?.color;
+
 	const handleOnChange = (next) =>
 		setColors((prev) => {
-			const nextState = _.sortBy([...prev], "stop");
-			nextState[currentIndex].color = next;
+			const nextState = [...prev];
+			getCurrentColor(nextState).color = next;
 			return nextState;
 		});
 
-	const handleOnChangeColorStop = (index) => (next) =>
+	const handleOnChangeColorStop = (id) => (next) =>
 		setColors((prev) => {
 			const nextState = [...prev];
-			nextState[index].stop = next;
+			getCurrentColor(nextState, id).stop = next;
 			return nextState;
 		});
 
@@ -232,7 +284,8 @@ const GradientColorPicker = () => {
 			return `${color.color} ${color.stop}%`;
 		})
 		.join(",");
-	const linearGradient = `linear-gradient(90deg, ${gradientValues})`;
+	const linearGradientBar = `linear-gradient(90deg, ${gradientValues})`;
+	const linearGradient = `linear-gradient(${deg}deg, ${gradientValues})`;
 
 	const addStop = (event) => {
 		const { pageX: px } = event;
@@ -241,67 +294,71 @@ const GradientColorPicker = () => {
 		const mx = (dx / w) * 100;
 		const stop = Math.round(_.clamp(mx, 0, 100));
 
-		const asc = colors.sort((a, b) => a.stop - b.stop);
-		const desc = [...asc].reverse();
-
-		const _prev = asc.find((i) => i.stop < stop);
-		const _next = desc.find((i) => i.stop > stop);
-
-		const prev = _prev || asc[0];
-		const next = _next || desc[0];
-
-		const color = colorize.mix(prev.color, next.color, stop).toHexString();
+		const nextId = uuid();
 		const nextColor = {
-			color,
 			stop,
-			id: uuid(),
+			id: nextId,
 		};
+
+		const temp = _.sortBy([...colors, nextColor], "stop");
+		const tempIndex = temp.indexOf(nextColor);
+		const prev = temp[Math.max(0, tempIndex - 1)];
+		const next = temp[Math.min(temp.length - 1, tempIndex + 1)];
+		const color = colorize.mix(prev.color, next.color, stop).toHexString();
+		nextColor.color = color;
+
 		setColors((prev) => [...prev, nextColor]);
+		setCurrentId(nextId);
 	};
 
 	return (
 		<VStack>
 			<Collapsible>
-				<HStack>
-					<Spacer>
-						<View
-							css={{
-								height: 24,
-								borderRadius: 4,
-								position: "relative",
-								cursor: "copy",
-								userSelect: "none",
-							}}
-							style={{ background: linearGradient }}
-							onClick={addStop}
-						>
-							{colors.map((color, index) => (
-								<GradientStop
-									key={index}
-									index={index}
-									setCurrentIndex={setCurrentIndex}
-									{...color}
-									onClick={() => setCurrentIndex(index)}
-									onDrag={handleOnChangeColorStop(index)}
-								/>
-							))}
-						</View>
-					</Spacer>
-					<Tooltip content="Show Gradient Stops">
-						<span>
-							<CollapsibleTrigger
-								as={Button}
-								icon={<FiChevronDown />}
-								isSubtle
-								isControl
-								size="small"
+				<VStack spacing={3}>
+					<View
+						css={{
+							height: 24,
+							borderRadius: 4,
+							position: "relative",
+							cursor: "copy",
+							userSelect: "none",
+						}}
+						style={{ background: linearGradientBar }}
+						onClick={addStop}
+					>
+						{colors.map((color, index) => (
+							<GradientStop
+								key={index}
+								index={index}
+								setCurrentId={setCurrentId}
+								{...color}
+								onRemove={handleOnRemove(color.id)}
+								onClick={() => setCurrentId(color.id)}
+								onDrag={handleOnChangeColorStop(color.id)}
 							/>
-						</span>
-					</Tooltip>
-				</HStack>
+						))}
+					</View>
+					<HStack>
+						<View>
+							<AngleControl value={deg} onChange={setDeg} />
+						</View>
+						<Spacer />
+						<Tooltip content="Show Gradient Stops">
+							<span>
+								<CollapsibleTrigger
+									as={Button}
+									icon={<FiChevronDown />}
+									isSubtle
+									isControl
+									size="small"
+								/>
+							</span>
+						</Tooltip>
+					</HStack>
+				</VStack>
 				<CollapsibleContent>
 					<Spacer pt={5} m={0} />
-					<VStack>
+					<Spacer>
 						<Grid alignment="center" templateColumns="24px 1fr 1fr 20px">
 							<div />
 							<Text variant="muted" weight={600}>
@@ -311,18 +368,19 @@ const GradientColorPicker = () => {
 								Stop
 							</Text>
 						</Grid>
-						{sortedColors.map((color, index) => (
-							<div key={index}>
-								<ColorStop
-									{...color}
-									onClick={() => setCurrentIndex(index)}
-									onChangeStop={handleOnChangeColorStop(index)}
-									onRemove={handleOnRemove(color.id)}
-									showRemove={colors.length > 1}
-								/>
-							</div>
-						))}
-					</VStack>
+					</Spacer>
+					{sortedColors.map((color, index) => (
+						<div key={index}>
+							<ColorStop
+								{...color}
+								isSelected={currentId === color.id}
+								onClick={() => setCurrentId(color.id)}
+								onChangeStop={handleOnChangeColorStop(color.id)}
+								onRemove={handleOnRemove(color.id)}
+								showRemove={colors.length > 1}
+							/>
+						</div>
+					))}
 				</CollapsibleContent>
 			</Collapsible>
 			<View>
@@ -332,7 +390,17 @@ const GradientColorPicker = () => {
 			<View>
 				<Separator />
 			</View>
-			<View style={{ background: linearGradient, height: 250 }} />
+			<View
+				style={{
+					background: linearGradient,
+					height: 250,
+					position: "fixed",
+					top: "20vh",
+					left: "50%",
+					width: 250,
+					transform: "translateX(-50%)",
+				}}
+			/>
 		</VStack>
 	);
 };
@@ -398,7 +466,9 @@ export default function Home() {
 				</Head>
 				<View css={{ padding: "10vh 10vw" }}>
 					<HStack alignment="top" spacing={5}>
-						<GradientColorPicker />
+						<View>
+							<GradientColorPicker />
+						</View>
 						<Spacer />
 						<Container width={280}>
 							{show && (
