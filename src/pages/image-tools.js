@@ -57,7 +57,7 @@ function getBackgroundStyles({
 	file = "/images/potato.jpg",
 }) {
 	let styles = {
-		backgroundImage: `url(${image || file})`,
+		backgroundImage: `url(${file || image})`,
 		backgroundRepeat: repeat,
 		backgroundPosition: `calc(50% + ${position.x}px) calc(50% + ${position.y}px)`,
 	};
@@ -109,8 +109,15 @@ const repeatOptions = [
 	},
 ];
 
-function ImageControls({ image, position, scale, size, repeat, onChange }) {
-	const [file, setFile] = React.useState("");
+function ImageControls({
+	image,
+	position,
+	scale,
+	size,
+	repeat,
+	file,
+	onChange,
+}) {
 	const dropzoneRef = React.useRef();
 
 	const isSizeCustom = size === "custom";
@@ -119,7 +126,7 @@ function ImageControls({ image, position, scale, size, repeat, onChange }) {
 		const file = dropzoneRef.current.files[0];
 		const reader = new FileReader();
 		reader.onloadend = function () {
-			setFile(reader.result);
+			onChange({ file: reader.result });
 		};
 		if (file) {
 			reader.readAsDataURL(file);
@@ -141,6 +148,7 @@ function ImageControls({ image, position, scale, size, repeat, onChange }) {
 		image,
 		position,
 		size,
+		file,
 		file,
 		scale,
 		repeat,
