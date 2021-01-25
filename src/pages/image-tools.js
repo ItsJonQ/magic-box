@@ -169,7 +169,7 @@ function ImageControls({
 			y: Math.round(y),
 		});
 	});
-	const dragGestures = baseDragGestures();
+	const dragGestures = isSizeCustom ? baseDragGestures() : {};
 
 	const backgroundStyles = getBackgroundStyles({
 		image,
