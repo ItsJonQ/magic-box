@@ -39,7 +39,8 @@ import { useDrag } from "react-use-gesture";
 import { FiPlus, FiChevronDown } from "react-icons/fi";
 import colorize from "tinycolor2";
 import { v4 as uuid } from "uuid";
-import { AngleInput, ClientRender } from "components/index";
+import { AngleInput, ClientRender, PivotControl } from "components/index";
+import { interpolate } from "@wp-g2/utils";
 
 import Head from "next/head";
 import _ from "lodash";
@@ -57,11 +58,16 @@ function getBackgroundStyles({
 	repeat,
 	file = "/images/potato.jpg",
 }) {
+	let backgroundPosition = `${position.y} ${position.x}`;
+	if (!isNaN(position.y) && !isNaN(position.x)) {
+		backgroundPosition = `calc(50% + ${position.x}px) calc(50% + ${position.y}px)`;
+	}
+
 	let styles = {
 		backgroundAttachment: attachment,
 		backgroundImage: `url(${file || image})`,
 		backgroundRepeat: repeat,
-		backgroundPosition: `calc(50% + ${position.x}px) calc(50% + ${position.y}px)`,
+		backgroundPosition,
 	};
 
 	if (size === "custom") {
@@ -162,6 +168,10 @@ function ImageControls({
 		onChange(next);
 	};
 
+	const handleOnPivotChange = (next) => {
+		onChange(next);
+	};
+
 	const handleOnChangeSize = (next) => {
 		const nextState = { size: next };
 		onChange(nextState);
@@ -178,6 +188,7 @@ function ImageControls({
 	const handleOnChangeAttachment = (next) => {
 		onChange({ attachment: next });
 	};
+	const pivotPosition = `${position.y} ${position.x}`;
 
 	return (
 		<View>
@@ -197,6 +208,10 @@ function ImageControls({
 							left: 0,
 							right: 0,
 							bottom: 0,
+							cursor: "grab",
+							"&:active": {
+								cursor: "grabbing",
+							},
 						}}
 					/>
 					<View
@@ -230,10 +245,17 @@ function ImageControls({
 							/>
 						</FormGroup>
 						<FormGroup label="Position">
+							<PivotControl
+								value={pivotPosition}
+								onChange={handleOnPivotChange}
+							/>
+						</FormGroup>
+						<FormGroup label="Offset">
 							<Grid>
 								<TextInput
-									value={position.x}
+									value={isNaN(position.x) ? "" : position.x}
 									prefix={<PrefixLabel>X</PrefixLabel>}
+									placeholder="--"
 									suffix={<PrefixLabel>PX</PrefixLabel>}
 									type="number"
 									gap={1}
@@ -241,9 +263,10 @@ function ImageControls({
 									onChange={(next) => handleOnPositionChange({ x: next })}
 								/>
 								<TextInput
-									value={position.y}
+									value={isNaN(position.y) ? "" : position.y}
 									prefix={<PrefixLabel>Y</PrefixLabel>}
 									suffix={<PrefixLabel>PX</PrefixLabel>}
+									placeholder="--"
 									type="number"
 									gap={1}
 									arrows={false}
@@ -253,13 +276,28 @@ function ImageControls({
 						</FormGroup>
 						{isSizeCustom && (
 							<FormGroup label="Scale">
-								<Slider
-									value={scale}
-									onChange={handleOnChangeScale}
-									step={0.01}
-									min={0}
-									max={3}
-								/>
+								<Grid>
+									<TextInput
+										step={1}
+										min={1}
+										type="number"
+										value={Math.round(
+											interpolate(scale, [0.01, 10], [1, 1000])
+										)}
+										onChange={(next) =>
+											handleOnChangeScale(
+												interpolate(next, [1, 1000], [0.01, 10])
+											)
+										}
+									/>
+									<Slider
+										value={scale}
+										onChange={handleOnChangeScale}
+										step={0.01}
+										min={0.01}
+										max={3}
+									/>
+								</Grid>
 							</FormGroup>
 						)}
 						<FormGroup label="Repeat">
@@ -297,8 +335,8 @@ export default function Home() {
 		image: "/images/potato.jpg",
 		size: "fill",
 		repeat: "no-repeat",
-		x: 0,
-		y: 0,
+		x: "center",
+		y: "center",
 		scale: 1,
 		attachment: "initial",
 	});

@@ -3,6 +3,7 @@ export * from "./BoxControl";
 export * from "./ClientRender";
 export * from "./ContextSystemProvider";
 export * from "./MagicBox";
+export * from "./PivotControl";
 export * from "./PrefixText";
 export * from "./SectionFormGroup";
 export * from "./SoftIcon";
