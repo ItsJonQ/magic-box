@@ -47,7 +47,7 @@ import {
 	PrefixText,
 } from "components/index";
 import { styled } from "@wp-g2/styles";
-import { interpolate } from "@wp-g2/utils";
+import { interpolate, add } from "@wp-g2/utils";
 
 import Head from "next/head";
 import _ from "lodash";
@@ -67,13 +67,11 @@ function getBackgroundStyles({
 	scale,
 	px,
 	py,
-	x,
-	y,
 	image,
 	repeat,
 	file = "/images/potato.jpg",
 }) {
-	const backgroundPosition = `calc(${px}% + ${x}px) calc(${py}% + ${y}px)`;
+	const backgroundPosition = `${px}% ${py}%`;
 
 	let styles = {
 		backgroundAttachment: attachment,
@@ -136,8 +134,6 @@ function ImageControls({
 	size,
 	px,
 	py,
-	x,
-	y,
 	attachment,
 	repeat,
 	file,
@@ -163,13 +159,14 @@ function ImageControls({
 	const baseDragGestures = useDrag((dragProps) => {
 		if (!dragProps.dragging) return;
 
-		const [x, y] = dragProps.offset;
+		const [x, y] = dragProps.delta;
+
 		handleOnPositionChange({
-			x: Math.round(x),
-			y: Math.round(y),
+			x: Math.round(add(position.x, x)),
+			y: Math.round(add(position.y, y)),
 		});
 	});
-	const dragGestures = isSizeCustom ? baseDragGestures() : {};
+	const dragGestures = baseDragGestures();
 
 	const backgroundStyles = getBackgroundStyles({
 		image,
@@ -178,8 +175,6 @@ function ImageControls({
 		size,
 		file,
 		file,
-		x,
-		y,
 		px,
 		py,
 		scale,
@@ -187,7 +182,7 @@ function ImageControls({
 	});
 
 	const handleOnPositionChange = (next) => {
-		onChange(next);
+		onChange({ px: next.x, py: next.y });
 	};
 
 	const handleOnPivotChange = (next) => {
@@ -246,6 +241,7 @@ function ImageControls({
 					<View
 						{...dragGestures}
 						css={{
+							background: "rgba(0,0,0,0.1)",
 							position: "absolute",
 							top: 0,
 							left: 0,
@@ -293,28 +289,26 @@ function ImageControls({
 							/>
 						</FormGroup>
 						<FormGroup label="Position">
-							<PivotControl
-								value={pivotPosition}
-								onChange={handleOnPivotChange}
-							/>
-						</FormGroup>
-						{isSizeCustom && (
-							<FormGroup label="Offset">
+							<VStack>
+								<PivotControl
+									value={pivotPosition}
+									onChange={handleOnPivotChange}
+								/>
 								<Grid>
 									<TextInput
-										value={x}
+										value={px}
 										prefix={<PrefixText>X</PrefixText>}
 										placeholder="--"
-										suffix={<PrefixText>PX</PrefixText>}
+										suffix={<PrefixText>%</PrefixText>}
 										type="number"
 										gap={1}
 										arrows={false}
 										onChange={(next) => handleOnPositionChange({ x: next })}
 									/>
 									<TextInput
-										value={y}
+										value={py}
 										prefix={<PrefixText>Y</PrefixText>}
-										suffix={<PrefixText>PX</PrefixText>}
+										suffix={<PrefixText>%</PrefixText>}
 										placeholder="--"
 										type="number"
 										gap={1}
@@ -322,8 +316,9 @@ function ImageControls({
 										onChange={(next) => handleOnPositionChange({ y: next })}
 									/>
 								</Grid>
-							</FormGroup>
-						)}
+							</VStack>
+						</FormGroup>
+
 						{isSizeCustom && (
 							<FormGroup label="Scale">
 								<Grid>
@@ -389,15 +384,13 @@ export default function Home() {
 		image: "/images/potato.jpg",
 		size: "fill",
 		repeat: "no-repeat",
-		x: 0,
-		y: 0,
 		px: 50,
 		py: 50,
 		scale: 1,
 		attachment: "initial",
 	});
 
-	const position = { x: background.x, y: background.y };
+	const position = { x: background.px, y: background.py };
 
 	const handleOnChange = (next) =>
 		setBackground((prev) => ({ ...prev, ...next }));
