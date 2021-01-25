@@ -39,15 +39,16 @@ import { useDrag } from "react-use-gesture";
 import { FiPlus, FiChevronDown } from "react-icons/fi";
 import colorize from "tinycolor2";
 import { v4 as uuid } from "uuid";
-import { AngleInput, ClientRender, PivotControl } from "components/index";
+import {
+	AngleInput,
+	ClientRender,
+	PivotControl,
+	PrefixText,
+} from "components/index";
 import { interpolate } from "@wp-g2/utils";
 
 import Head from "next/head";
 import _ from "lodash";
-
-function PrefixLabel(props) {
-	return <Text size={10} variant="muted" isBlock lineHeight="1" {...props} />;
-}
 
 function getBackgroundStyles({
 	attachment,
@@ -233,6 +234,7 @@ function ImageControls({
 						<FormGroup label="Image">
 							<input type="file" onChange={handleOnUpload} ref={dropzoneRef} />
 						</FormGroup>
+						<Divider />
 						<FormGroup label="Size">
 							<SegmentedControl
 								value={size}
@@ -254,9 +256,9 @@ function ImageControls({
 							<Grid>
 								<TextInput
 									value={isNaN(position.x) ? "" : position.x}
-									prefix={<PrefixLabel>X</PrefixLabel>}
+									prefix={<PrefixText>X</PrefixText>}
 									placeholder="--"
-									suffix={<PrefixLabel>PX</PrefixLabel>}
+									suffix={<PrefixText>PX</PrefixText>}
 									type="number"
 									gap={1}
 									arrows={false}
@@ -264,8 +266,8 @@ function ImageControls({
 								/>
 								<TextInput
 									value={isNaN(position.y) ? "" : position.y}
-									prefix={<PrefixLabel>Y</PrefixLabel>}
-									suffix={<PrefixLabel>PX</PrefixLabel>}
+									prefix={<PrefixText>Y</PrefixText>}
+									suffix={<PrefixText>PX</PrefixText>}
 									placeholder="--"
 									type="number"
 									gap={1}
@@ -280,6 +282,7 @@ function ImageControls({
 									<TextInput
 										step={1}
 										min={1}
+										suffix={<PrefixText>%</PrefixText>}
 										type="number"
 										value={Math.round(
 											interpolate(scale, [0.01, 10], [1, 1000])
@@ -300,6 +303,7 @@ function ImageControls({
 								</Grid>
 							</FormGroup>
 						)}
+						<Divider />
 						<FormGroup label="Repeat">
 							<Select
 								options={repeatOptions}
