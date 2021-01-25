@@ -49,6 +49,7 @@ function PrefixLabel(props) {
 }
 
 function getBackgroundStyles({
+	attachment,
 	size,
 	scale,
 	position,
@@ -57,6 +58,7 @@ function getBackgroundStyles({
 	file = "/images/potato.jpg",
 }) {
 	let styles = {
+		backgroundAttachment: attachment,
 		backgroundImage: `url(${file || image})`,
 		backgroundRepeat: repeat,
 		backgroundPosition: `calc(50% + ${position.x}px) calc(50% + ${position.y}px)`,
@@ -114,6 +116,7 @@ function ImageControls({
 	position,
 	scale,
 	size,
+	attachment,
 	repeat,
 	file,
 	onChange,
@@ -146,6 +149,7 @@ function ImageControls({
 
 	const backgroundStyles = getBackgroundStyles({
 		image,
+		attachment,
 		position,
 		size,
 		file,
@@ -171,6 +175,10 @@ function ImageControls({
 		onChange({ repeat: next });
 	};
 
+	const handleOnChangeAttachment = (next) => {
+		onChange({ attachment: next });
+	};
+
 	return (
 		<View>
 			<Card>
@@ -194,6 +202,7 @@ function ImageControls({
 					<View
 						style={{
 							...backgroundStyles,
+							backgroundAttachment: null,
 							pointerEvents: "none",
 							position: "absolute",
 							top: 0,
@@ -260,6 +269,22 @@ function ImageControls({
 								onChange={handleOnChangeRepeat}
 							/>
 						</FormGroup>
+						<FormGroup label="Fixed">
+							<SegmentedControl
+								value={attachment}
+								onChange={handleOnChangeAttachment}
+								options={[
+									{
+										label: "Fixed",
+										value: "fixed",
+									},
+									{
+										label: "None",
+										value: "initial",
+									},
+								]}
+							/>
+						</FormGroup>
 					</ListGroup>
 				</CardBody>
 			</Card>
@@ -275,6 +300,7 @@ export default function Home() {
 		x: 0,
 		y: 0,
 		scale: 1,
+		attachment: "initial",
 	});
 
 	const position = { x: background.x, y: background.y };
@@ -294,7 +320,9 @@ export default function Home() {
 					<title>G2: Background Tools</title>
 					<link rel="icon" href="/favicon.ico" />
 				</Head>
-				<View css={{ padding: "10vh 10vw" }}>
+				<View
+					css={{ padding: "10vh 10vw", position: "fixed", top: 0, right: 0 }}
+				>
 					<Container width={280} css={{ marginRight: 0 }}>
 						<ClientRender>
 							<ImageControls
@@ -309,12 +337,12 @@ export default function Home() {
 			<View
 				style={{
 					...backgroundStyles,
-					position: "fixed",
-					zIndex: -1,
-					top: 0,
-					bottom: 0,
-					left: 0,
-					right: 0,
+					height: "100vh",
+				}}
+			/>
+			<View
+				style={{
+					height: "300vh",
 				}}
 			/>
 		</View>
