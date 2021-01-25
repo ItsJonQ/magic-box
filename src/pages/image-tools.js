@@ -147,6 +147,7 @@ function ImageControls({
 	const dropzoneRef = React.useRef();
 
 	const isSizeCustom = size === "custom";
+	const isSizeFill = size === "fill";
 
 	const handleOnUpload = () => {
 		const file = dropzoneRef.current.files[0];
@@ -195,6 +196,10 @@ function ImageControls({
 
 	const handleOnChangeSize = (next) => {
 		const nextState = { size: next };
+		if (next !== "custom") {
+			nextState.x = 0;
+			nextState.y = 0;
+		}
 		onChange(nextState);
 	};
 
@@ -293,30 +298,32 @@ function ImageControls({
 								onChange={handleOnPivotChange}
 							/>
 						</FormGroup>
-						<FormGroup label="Offset">
-							<Grid>
-								<TextInput
-									value={x}
-									prefix={<PrefixText>X</PrefixText>}
-									placeholder="--"
-									suffix={<PrefixText>PX</PrefixText>}
-									type="number"
-									gap={1}
-									arrows={false}
-									onChange={(next) => handleOnPositionChange({ x: next })}
-								/>
-								<TextInput
-									value={y}
-									prefix={<PrefixText>Y</PrefixText>}
-									suffix={<PrefixText>PX</PrefixText>}
-									placeholder="--"
-									type="number"
-									gap={1}
-									arrows={false}
-									onChange={(next) => handleOnPositionChange({ y: next })}
-								/>
-							</Grid>
-						</FormGroup>
+						{isSizeCustom && (
+							<FormGroup label="Offset">
+								<Grid>
+									<TextInput
+										value={x}
+										prefix={<PrefixText>X</PrefixText>}
+										placeholder="--"
+										suffix={<PrefixText>PX</PrefixText>}
+										type="number"
+										gap={1}
+										arrows={false}
+										onChange={(next) => handleOnPositionChange({ x: next })}
+									/>
+									<TextInput
+										value={y}
+										prefix={<PrefixText>Y</PrefixText>}
+										suffix={<PrefixText>PX</PrefixText>}
+										placeholder="--"
+										type="number"
+										gap={1}
+										arrows={false}
+										onChange={(next) => handleOnPositionChange({ y: next })}
+									/>
+								</Grid>
+							</FormGroup>
+						)}
 						{isSizeCustom && (
 							<FormGroup label="Scale">
 								<Grid>
@@ -345,13 +352,15 @@ function ImageControls({
 							</FormGroup>
 						)}
 						<Divider />
-						<FormGroup label="Repeat">
-							<Select
-								options={repeatOptions}
-								value={repeat}
-								onChange={handleOnChangeRepeat}
-							/>
-						</FormGroup>
+						{!isSizeFill && (
+							<FormGroup label="Repeat">
+								<Select
+									options={repeatOptions}
+									value={repeat}
+									onChange={handleOnChangeRepeat}
+								/>
+							</FormGroup>
+						)}
 						<FormGroup label="Fixed">
 							<SegmentedControl
 								value={attachment}
