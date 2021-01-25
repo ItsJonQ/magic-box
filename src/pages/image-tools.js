@@ -113,7 +113,6 @@ function ImageControls({ image, position, scale, size, repeat, onChange }) {
 	const [file, setFile] = React.useState("");
 	const dropzoneRef = React.useRef();
 
-	const isSizeFill = size === "fill";
 	const isSizeCustom = size === "custom";
 
 	const handleOnUpload = () => {
@@ -128,6 +127,8 @@ function ImageControls({ image, position, scale, size, repeat, onChange }) {
 	};
 
 	const baseDragGestures = useDrag((dragProps) => {
+		if (!dragProps.dragging) return;
+
 		const [x, y] = dragProps.offset;
 		handleOnPositionChange({
 			x: Math.round(x),
