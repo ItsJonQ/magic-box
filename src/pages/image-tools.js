@@ -29,6 +29,7 @@ import {
 	ListGroupHeader,
 	ListGroups,
 	TextInput,
+	Switch,
 	Select,
 	SegmentedControl,
 	Spacer,
@@ -45,24 +46,34 @@ import {
 	PivotControl,
 	PrefixText,
 } from "components/index";
+import { styled } from "@wp-g2/styles";
 import { interpolate } from "@wp-g2/utils";
 
 import Head from "next/head";
 import _ from "lodash";
 
+const GridLine = styled.div`
+	background: rgba(255, 255, 255, 0.6);
+	box-shadow: 0 0 4px 1px rgba(0, 0, 0, 0.1);
+	opacity: 0.4;
+	position: absolute;
+	pointer-events: none;
+	z-index: 1;
+`;
+
 function getBackgroundStyles({
 	attachment,
 	size,
 	scale,
-	position,
+	px,
+	py,
+	x,
+	y,
 	image,
 	repeat,
 	file = "/images/potato.jpg",
 }) {
-	let backgroundPosition = `${position.y} ${position.x}`;
-	if (!isNaN(position.y) && !isNaN(position.x)) {
-		backgroundPosition = `calc(50% + ${position.x}px) calc(50% + ${position.y}px)`;
-	}
+	const backgroundPosition = `calc(${px}% + ${x}px) calc(${py}% + ${y}px)`;
 
 	let styles = {
 		backgroundAttachment: attachment,
@@ -123,11 +134,16 @@ function ImageControls({
 	position,
 	scale,
 	size,
+	px,
+	py,
+	x,
+	y,
 	attachment,
 	repeat,
 	file,
 	onChange,
 }) {
+	const [showGrid, setGrid] = React.useState(true);
 	const dropzoneRef = React.useRef();
 
 	const isSizeCustom = size === "custom";
@@ -161,6 +177,10 @@ function ImageControls({
 		size,
 		file,
 		file,
+		x,
+		y,
+		px,
+		py,
 		scale,
 		repeat,
 	});
@@ -170,7 +190,7 @@ function ImageControls({
 	};
 
 	const handleOnPivotChange = (next) => {
-		onChange(next);
+		onChange({ px: next.x, py: next.y });
 	};
 
 	const handleOnChangeSize = (next) => {
@@ -189,7 +209,7 @@ function ImageControls({
 	const handleOnChangeAttachment = (next) => {
 		onChange({ attachment: next });
 	};
-	const pivotPosition = `${position.y} ${position.x}`;
+	const pivotPosition = `${py} ${px}`;
 
 	return (
 		<View>
@@ -201,6 +221,23 @@ function ImageControls({
 						position: "relative",
 					}}
 				>
+					{showGrid && (
+						<>
+							<GridLine
+								css={{ top: 0, left: "33%", height: "100%", width: 1 }}
+							/>
+							<GridLine
+								css={{ top: 0, left: "66%", height: "100%", width: 1 }}
+							/>
+							<GridLine
+								css={{ left: 0, top: "33%", width: "100%", height: 1 }}
+							/>
+							<GridLine
+								css={{ left: 0, top: "66%", width: "100%", height: 1 }}
+							/>
+						</>
+					)}
+
 					<View
 						{...dragGestures}
 						css={{
@@ -235,6 +272,10 @@ function ImageControls({
 							<input type="file" onChange={handleOnUpload} ref={dropzoneRef} />
 						</FormGroup>
 						<Divider />
+						<FormGroup label="Grid">
+							<Switch checked={showGrid} onChange={setGrid} />
+						</FormGroup>
+						<Divider />
 						<FormGroup label="Size">
 							<SegmentedControl
 								value={size}
@@ -255,7 +296,7 @@ function ImageControls({
 						<FormGroup label="Offset">
 							<Grid>
 								<TextInput
-									value={isNaN(position.x) ? "" : position.x}
+									value={x}
 									prefix={<PrefixText>X</PrefixText>}
 									placeholder="--"
 									suffix={<PrefixText>PX</PrefixText>}
@@ -265,7 +306,7 @@ function ImageControls({
 									onChange={(next) => handleOnPositionChange({ x: next })}
 								/>
 								<TextInput
-									value={isNaN(position.y) ? "" : position.y}
+									value={y}
 									prefix={<PrefixText>Y</PrefixText>}
 									suffix={<PrefixText>PX</PrefixText>}
 									placeholder="--"
@@ -339,8 +380,10 @@ export default function Home() {
 		image: "/images/potato.jpg",
 		size: "fill",
 		repeat: "no-repeat",
-		x: "center",
-		y: "center",
+		x: 0,
+		y: 0,
+		px: 50,
+		py: 50,
 		scale: 1,
 		attachment: "initial",
 	});

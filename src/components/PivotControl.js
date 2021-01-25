@@ -94,16 +94,15 @@ const getPivotCoords = (position) => {
 };
 
 const positions = {
-	"top left": 0,
-	"top center": 1,
-	"top right": 2,
-	"center left": 3,
-	center: 4,
-	"center center": 4,
-	"center right": 5,
-	"bottom left": 6,
-	"bottom center": 7,
-	"bottom right": 8,
+	"0 0": 0,
+	"0 50": 1,
+	"0 100": 2,
+	"50 0": 3,
+	"50 50": 4,
+	"50 100": 5,
+	"100 0": 6,
+	"100 50": 7,
+	"100 100": 8,
 };
 const positionIndices = _.invert(positions);
 
