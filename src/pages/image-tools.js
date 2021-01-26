@@ -216,8 +216,8 @@ function ImageControls({
 			<Card>
 				<CardBody
 					css={{
-						width: 280,
-						height: 200,
+						width: "100%",
+						height: 180,
 						position: "relative",
 					}}
 				>
@@ -341,7 +341,7 @@ function ImageControls({
 										onChange={handleOnChangeScale}
 										step={0.01}
 										min={0.01}
-										max={3}
+										max={2}
 									/>
 								</Grid>
 							</FormGroup>
