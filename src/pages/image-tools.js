@@ -4,6 +4,7 @@ import {
 	Button,
 	Card,
 	CardBody,
+	Image,
 	CardHeader,
 	CloseButton,
 	ColorCircle,
@@ -37,7 +38,7 @@ import {
 	View,
 } from "@wp-g2/components";
 import { useDrag } from "react-use-gesture";
-import { FiPlus, FiChevronDown } from "react-icons/fi";
+import { FiPlus, FiChevronDown, FiMenu } from "react-icons/fi";
 import colorize from "tinycolor2";
 import { v4 as uuid } from "uuid";
 import {
@@ -48,9 +49,52 @@ import {
 } from "components/index";
 import { styled } from "@wp-g2/styles";
 import { interpolate, add } from "@wp-g2/utils";
+import {
+	sortableContainer,
+	sortableElement,
+	sortableHandle,
+} from "react-sortable-hoc";
+import arrayMove from "array-move";
+
+const DragHandle = sortableHandle(() => (
+	<span>
+		<Text variant="muted" isBlock>
+			<Icon size={12} icon={<FiMenu />} />
+		</Text>
+	</span>
+));
+const SortableItem = sortableElement(({ children }) => <div>{children}</div>);
+
+const SortableContainer = sortableContainer(({ children }) => {
+	return <div>{children}</div>;
+});
 
 import Head from "next/head";
 import _ from "lodash";
+
+const imageOptions = [
+	{
+		value: "potato",
+		label: "Potato",
+	},
+	{
+		value: "boba",
+		label: "Boba",
+	},
+	{
+		value: "sand",
+		label: "Sand",
+	},
+	{
+		value: "leaves",
+		label: "Leaves",
+	},
+	{
+		value: "egg",
+		label: "Egg",
+	},
+];
+const imageOptionsValues = imageOptions.map((o) => o.value);
 
 const GridLine = styled.div`
 	background: rgba(255, 255, 255, 0.6);
@@ -61,6 +105,21 @@ const GridLine = styled.div`
 	z-index: 1;
 `;
 
+function getCompleteBackgroundStyles(backgrounds) {
+	const styles = backgrounds.map(getBackgroundStyles);
+	if (styles.length <= 1) return styles[0];
+
+	const combinedStyles = styles.reduce((combined, current) => {
+		const entries = Object.entries(current);
+		entries.forEach(([k, v]) => {
+			combined[k] = combined[k] ? [combined[k], v].join(",") : v;
+		});
+		return combined;
+	}, {});
+
+	return combinedStyles;
+}
+
 function getBackgroundStyles({
 	attachment,
 	size,
@@ -69,36 +128,27 @@ function getBackgroundStyles({
 	py,
 	image,
 	repeat,
-	file = "/images/potato.jpg",
 }) {
 	const backgroundPosition = `${px}% ${py}%`;
+	const imageUrl = `/images/${image}.jpg`;
 
-	let styles = {
+	const styles = {
 		backgroundAttachment: attachment,
-		backgroundImage: `url(${file || image})`,
+		backgroundImage: `url(${imageUrl})`,
 		backgroundRepeat: repeat,
 		backgroundPosition,
 	};
 
 	if (size === "custom") {
-		styles = {
-			...styles,
-			backgroundSize: `${scale * 100}%`,
-		};
+		styles.backgroundSize = `${scale * 100}%`;
 	}
 
 	if (size === "fill") {
-		styles = {
-			...styles,
-			backgroundSize: "cover",
-		};
+		styles.backgroundSize = `cover`;
 	}
 
 	if (size === "fit") {
-		styles = {
-			...styles,
-			backgroundSize: "contain",
-		};
+		styles.backgroundSize = `contain`;
 	}
 
 	return styles;
@@ -129,31 +179,23 @@ const repeatOptions = [
 
 function ImageControls({
 	image,
-	position,
 	scale,
 	size,
 	px,
 	py,
 	attachment,
 	repeat,
-	file,
 	onChange,
+	onCloseModal,
 }) {
 	const [showGrid, setGrid] = React.useState(true);
-	const dropzoneRef = React.useRef();
+	const position = { x: px, y: py };
 
 	const isSizeCustom = size === "custom";
 	const isSizeFill = size === "fill";
 
-	const handleOnUpload = () => {
-		const file = dropzoneRef.current.files[0];
-		const reader = new FileReader();
-		reader.onloadend = function () {
-			onChange({ file: reader.result });
-		};
-		if (file) {
-			reader.readAsDataURL(file);
-		}
+	const handleOnImageChange = (next) => {
+		onChange({ image: next });
 	};
 
 	const baseDragGestures = useDrag((dragProps) => {
@@ -173,8 +215,6 @@ function ImageControls({
 		attachment,
 		position,
 		size,
-		file,
-		file,
 		px,
 		py,
 		scale,
@@ -214,6 +254,14 @@ function ImageControls({
 	return (
 		<View>
 			<Card>
+				<CardHeader size="small">
+					<Text weight={600}>Background Image</Text>
+					<CloseButton
+						size="small"
+						css={{ marginRight: -4 }}
+						onClick={onCloseModal}
+					/>
+				</CardHeader>
 				<CardBody
 					css={{
 						width: "100%",
@@ -270,7 +318,11 @@ function ImageControls({
 				<CardBody>
 					<ListGroup>
 						<FormGroup label="Image">
-							<input type="file" onChange={handleOnUpload} ref={dropzoneRef} />
+							<Select
+								options={imageOptions}
+								onChange={handleOnImageChange}
+								value={image}
+							/>
 						</FormGroup>
 						<Divider />
 						<FormGroup label="Grid">
@@ -367,7 +419,7 @@ function ImageControls({
 									},
 									{
 										label: "None",
-										value: "initial",
+										value: "scroll",
 									},
 								]}
 							/>
@@ -379,26 +431,124 @@ function ImageControls({
 	);
 }
 
-export default function Home() {
-	const [background, setBackground] = React.useState({
-		image: "/images/potato.jpg",
+function createBackgroundData(props) {
+	return {
+		image: "potato",
 		size: "fill",
 		repeat: "no-repeat",
 		px: 50,
 		py: 50,
 		scale: 1,
-		attachment: "initial",
-	});
+		attachment: "scroll",
+		id: uuid(),
+		...props,
+	};
+}
 
-	const position = { x: background.px, y: background.py };
+function BackgroundList({
+	onAddBackground,
+	backgrounds,
+	currentBackgroundId,
+	onRemoveBackground,
+	onSetBackgrounds,
+	showModal,
+}) {
+	const handleOnSortEnd = ({ oldIndex, newIndex }) => {
+		onSetBackgrounds((prev) => arrayMove(prev, oldIndex, newIndex));
+	};
 
-	const handleOnChange = (next) =>
-		setBackground((prev) => ({ ...prev, ...next }));
+	return (
+		<Card>
+			<CardHeader>
+				<Text weight={600}>Images</Text>
+				<Button
+					icon={<FiPlus />}
+					isSubtle
+					isControl
+					size="small"
+					onClick={onAddBackground}
+				/>
+			</CardHeader>
+			<CardBody>
+				<SortableContainer onSortEnd={handleOnSortEnd} useDragHandle>
+					{backgrounds.map((bg, index) => (
+						<SortableItem key={bg.id} index={index}>
+							<View
+								key={bg.id}
+								onClick={() => {
+									showModal(bg.id);
+								}}
+								css={{
+									borderRadius: 4,
+									background:
+										currentBackgroundId === bg.id ? "rgba(0,0,0,0.08)" : null,
+									padding: 4,
+								}}
+							>
+								<HStack>
+									<DragHandle />
+									<View css={{ width: 24 }}>
+										<Image
+											src={`/images/${bg.image}.jpg`}
+											aspectRatio={1 / 1}
+											css={{ borderRadius: 4 }}
+										/>
+									</View>
+									<Spacer>
+										<Text variant="muted">{bg.image}.jpg</Text>
+									</Spacer>
+									<CloseButton
+										size="xSmall"
+										onClick={(e) => {
+											e.stopPropagation();
+											onRemoveBackground(bg.id);
+										}}
+									/>
+								</HStack>
+							</View>
+						</SortableItem>
+					))}
+				</SortableContainer>
+			</CardBody>
+		</Card>
+	);
+}
 
-	const backgroundStyles = getBackgroundStyles({
-		...background,
-		position,
-	});
+export default function Home() {
+	const [backgrounds, setBackgrounds] = React.useState([
+		createBackgroundData({ image: "potato" }),
+		createBackgroundData({ image: "sand" }),
+	]);
+	const [currentBackgroundId, setCurrentBackgroundId] = React.useState(null);
+
+	const handleOnChange = (next) => {
+		setBackgrounds((prev) => {
+			return prev.map((bg) => {
+				if (bg.id !== currentBackgroundId) return bg;
+				return {
+					...bg,
+					...next,
+				};
+			});
+		});
+	};
+
+	const handleOnCloseModal = () => setCurrentBackgroundId(null);
+	const combinedStyles = getCompleteBackgroundStyles(backgrounds);
+	const currentBackground =
+		backgrounds.find((bg) => bg.id === currentBackgroundId) || {};
+
+	const addBackground = () => {
+		setBackgrounds((prev) => [
+			...prev,
+			createBackgroundData({ image: _.sample(imageOptionsValues) }),
+		]);
+	};
+
+	const removeBackground = (id) => {
+		handleOnCloseModal();
+		setBackgrounds((prev) => prev.filter((bg) => bg.id !== id));
+	};
 
 	return (
 		<View>
@@ -408,22 +558,45 @@ export default function Home() {
 					<link rel="icon" href="/favicon.ico" />
 				</Head>
 				<View
-					css={{ padding: "10vh 10vw", position: "fixed", top: 0, right: 0 }}
+					css={{ padding: "5vh 5vw 0 0", position: "fixed", top: 0, right: 0 }}
 				>
-					<Container width={280} css={{ marginRight: 0 }}>
-						<ClientRender>
-							<ImageControls
-								{...background}
-								position={position}
-								onChange={handleOnChange}
-							/>
-						</ClientRender>
-					</Container>
+					<ClientRender>
+						<View css={{ position: "relative" }}>
+							<Container width={280} css={{ marginRight: 0, minWidth: 280 }}>
+								<BackgroundList
+									onSetBackgrounds={setBackgrounds}
+									onAddBackground={addBackground}
+									currentBackgroundId={currentBackgroundId}
+									backgrounds={backgrounds}
+									onRemoveBackground={removeBackground}
+									showModal={setCurrentBackgroundId}
+								/>
+							</Container>
+							<View
+								css={{
+									position: "absolute",
+									right: "100%",
+									marginRight: 12,
+									top: 0,
+								}}
+							>
+								<Container width={280} css={{ marginRight: 0, minWidth: 280 }}>
+									{!!currentBackgroundId && (
+										<ImageControls
+											{...currentBackground}
+											onChange={handleOnChange}
+											onCloseModal={handleOnCloseModal}
+										/>
+									)}
+								</Container>
+							</View>
+						</View>
+					</ClientRender>
 				</View>
 			</ContextSystemProvider>
 			<View
 				style={{
-					...backgroundStyles,
+					...combinedStyles,
 					height: "100vh",
 				}}
 			/>
