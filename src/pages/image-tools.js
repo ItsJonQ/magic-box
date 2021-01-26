@@ -58,7 +58,11 @@ import arrayMove from "array-move";
 
 const DragHandle = sortableHandle(() => (
 	<span>
-		<Text variant="muted" isBlock>
+		<Text
+			variant="muted"
+			isBlock
+			css={{ cursor: "move", "&:active": { cursor: "move" } }}
+		>
 			<Icon size={12} icon={<FiMenu />} />
 		</Text>
 	</span>
@@ -203,9 +207,9 @@ function ImageControls({
 
 		const [x, y] = dragProps.delta;
 
-		handleOnPositionChange({
-			x: Math.round(add(position.x, x)),
-			y: Math.round(add(position.y, y)),
+		onChange({
+			px: Math.round(add(position.x, x)),
+			py: Math.round(add(position.y, y)),
 		});
 	});
 	const dragGestures = baseDragGestures();
@@ -220,10 +224,6 @@ function ImageControls({
 		scale,
 		repeat,
 	});
-
-	const handleOnPositionChange = (next) => {
-		onChange({ px: next.x, py: next.y });
-	};
 
 	const handleOnPivotChange = (next) => {
 		onChange({ px: next.x, py: next.y });
@@ -355,7 +355,7 @@ function ImageControls({
 										type="number"
 										gap={1}
 										arrows={false}
-										onChange={(next) => handleOnPositionChange({ x: next })}
+										onChange={(next) => onChange({ px: next })}
 									/>
 									<TextInput
 										value={py}
@@ -365,7 +365,7 @@ function ImageControls({
 										type="number"
 										gap={1}
 										arrows={false}
-										onChange={(next) => handleOnPositionChange({ y: next })}
+										onChange={(next) => onChange({ py: next })}
 									/>
 								</Grid>
 							</VStack>
@@ -479,6 +479,7 @@ function BackgroundList({
 									showModal(bg.id);
 								}}
 								css={{
+									cursor: "pointer",
 									borderRadius: 4,
 									background:
 										currentBackgroundId === bg.id ? "rgba(0,0,0,0.08)" : null,
@@ -540,8 +541,8 @@ export default function Home() {
 
 	const addBackground = () => {
 		setBackgrounds((prev) => [
-			...prev,
 			createBackgroundData({ image: _.sample(imageOptionsValues) }),
+			...prev,
 		]);
 	};
 
