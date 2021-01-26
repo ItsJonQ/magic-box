@@ -164,7 +164,7 @@ const repeatOptions = [
 		value: "no-repeat",
 	},
 	{
-		label: "Repeat",
+		label: "Tiled",
 		value: "repeat",
 	},
 	{
@@ -176,7 +176,7 @@ const repeatOptions = [
 		value: "repeat-y",
 	},
 	{
-		label: "Space",
+		label: "Spaced Apart",
 		value: "space",
 	},
 ];
@@ -185,6 +185,7 @@ function ImageControls({
 	image,
 	scale,
 	size,
+	showPreview,
 	px,
 	py,
 	attachment,
@@ -262,59 +263,62 @@ function ImageControls({
 						onClick={onCloseModal}
 					/>
 				</CardHeader>
-				<CardBody
-					css={{
-						width: "100%",
-						height: 180,
-						position: "relative",
-					}}
-				>
-					{showGrid && (
-						<>
-							<GridLine
-								css={{ top: 0, left: "33%", height: "100%", width: 1 }}
+				{showPreview && (
+					<>
+						<CardBody
+							css={{
+								width: "100%",
+								height: 180,
+								position: "relative",
+							}}
+						>
+							{showGrid && (
+								<>
+									<GridLine
+										css={{ top: 0, left: "33%", height: "100%", width: 1 }}
+									/>
+									<GridLine
+										css={{ top: 0, left: "66%", height: "100%", width: 1 }}
+									/>
+									<GridLine
+										css={{ left: 0, top: "33%", width: "100%", height: 1 }}
+									/>
+									<GridLine
+										css={{ left: 0, top: "66%", width: "100%", height: 1 }}
+									/>
+								</>
+							)}
+							<View
+								{...dragGestures}
+								css={{
+									background: "rgba(0,0,0,0.1)",
+									position: "absolute",
+									top: 0,
+									left: 0,
+									right: 0,
+									bottom: 0,
+									cursor: "grab",
+									"&:active": {
+										cursor: "grabbing",
+									},
+								}}
 							/>
-							<GridLine
-								css={{ top: 0, left: "66%", height: "100%", width: 1 }}
+							<View
+								style={{
+									...backgroundStyles,
+									backgroundAttachment: null,
+									pointerEvents: "none",
+									position: "absolute",
+									top: 0,
+									left: 0,
+									right: 0,
+									bottom: 0,
+								}}
 							/>
-							<GridLine
-								css={{ left: 0, top: "33%", width: "100%", height: 1 }}
-							/>
-							<GridLine
-								css={{ left: 0, top: "66%", width: "100%", height: 1 }}
-							/>
-						</>
-					)}
-
-					<View
-						{...dragGestures}
-						css={{
-							background: "rgba(0,0,0,0.1)",
-							position: "absolute",
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-							cursor: "grab",
-							"&:active": {
-								cursor: "grabbing",
-							},
-						}}
-					/>
-					<View
-						style={{
-							...backgroundStyles,
-							backgroundAttachment: null,
-							pointerEvents: "none",
-							position: "absolute",
-							top: 0,
-							left: 0,
-							right: 0,
-							bottom: 0,
-						}}
-					/>
-				</CardBody>
-				<Divider />
+						</CardBody>
+						<Divider />
+					</>
+				)}
 				<CardBody>
 					<ListGroup>
 						<FormGroup label="Image">
@@ -325,10 +329,10 @@ function ImageControls({
 							/>
 						</FormGroup>
 						<Divider />
-						<FormGroup label="Grid">
+						{/* <FormGroup label="Grid">
 							<Switch checked={showGrid} onChange={setGrid} />
 						</FormGroup>
-						<Divider />
+						<Divider /> */}
 						<FormGroup label="Size">
 							<SegmentedControl
 								value={size}
@@ -585,6 +589,7 @@ export default function Home() {
 									{!!currentBackgroundId && (
 										<ImageControls
 											{...currentBackground}
+											showPreview={false}
 											onChange={handleOnChange}
 											onCloseModal={handleOnCloseModal}
 										/>
