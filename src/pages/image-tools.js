@@ -29,6 +29,7 @@ import {
 	SelectDropdown,
 	ListGroupHeader,
 	ListGroups,
+	UnitInput,
 	TextInput,
 	Switch,
 	Select,
@@ -48,7 +49,12 @@ import {
 	PrefixText,
 } from "components/index";
 import { styled } from "@wp-g2/styles";
-import { interpolate, add } from "@wp-g2/utils";
+import {
+	interpolate,
+	add,
+	parseUnitValue,
+	createUnitValue,
+} from "@wp-g2/utils";
 import {
 	sortableContainer,
 	sortableElement,
@@ -130,10 +136,12 @@ function getBackgroundStyles({
 	scale,
 	px,
 	py,
+	x,
+	y,
 	image,
 	repeat,
 }) {
-	const backgroundPosition = `${px}% ${py}%`;
+	const backgroundPosition = `calc(${px}% + ${x}px) calc(${py}% + ${y}px)`;
 	const imageUrl = `/images/${image}.jpg`;
 
 	const styles = {
@@ -185,9 +193,12 @@ function ImageControls({
 	image,
 	scale,
 	size,
-	showPreview,
+	blockRef,
+	showPreview = true,
 	px,
 	py,
+	x,
+	y,
 	attachment,
 	repeat,
 	onChange,
@@ -195,6 +206,9 @@ function ImageControls({
 }) {
 	const [showGrid, setGrid] = React.useState(true);
 	const position = { x: px, y: py };
+	const [previewSizeRatio, setPreviewSizeRatio] = React.useState(null);
+	const [previewSize, setPreviewSize] = React.useState({ width: 0, height: 0 });
+	const [imageSize, setImageSize] = React.useState({ width: 0, height: 0 });
 
 	const isSizeCustom = size === "custom";
 	const isSizeFill = size === "fill";
@@ -203,15 +217,35 @@ function ImageControls({
 		onChange({ image: next });
 	};
 
+	const currentBackground = { px, py };
+
 	const baseDragGestures = useDrag((dragProps) => {
 		if (!dragProps.dragging) return;
 
+		const { target } = dragProps.event;
 		const [x, y] = dragProps.delta;
+		const { clientWidth, clientHeight } = target;
 
-		onChange({
-			px: Math.round(add(position.x, x)),
-			py: Math.round(add(position.y, y)),
-		});
+		const rt = clientWidth / imageSize.width;
+
+		const cw = Math.round(imageSize.width * scale * rt);
+		const ch = Math.round(imageSize.height * scale * rt);
+
+		const qx = (x / clientWidth) * 100;
+		const qy = (y / clientHeight) * 100;
+
+		const tx = isSizeCustom ? (cw > clientWidth ? -1 : 1) : 1;
+		const ty = isSizeCustom ? (ch > clientHeight ? -1 : 1) : 1;
+
+		const nxpx = Math.round(add(px, qx * tx) * 1e2) / 1e2;
+		const nxpy = Math.round(add(py, qy * ty) * 1e2) / 1e2;
+
+		const next = {
+			px: nxpx,
+			py: nxpy,
+		};
+
+		onChange(next);
 	});
 	const dragGestures = baseDragGestures();
 
@@ -222,6 +256,8 @@ function ImageControls({
 		size,
 		px,
 		py,
+		x,
+		y,
 		scale,
 		repeat,
 	});
@@ -250,7 +286,31 @@ function ImageControls({
 	const handleOnChangeAttachment = (next) => {
 		onChange({ attachment: next });
 	};
-	const pivotPosition = `${py} ${px}`;
+	const pivotPosition = `${parseUnitValue(py)[0]} ${parseUnitValue(px)[0]}`;
+
+	const updatePreviewSizeRatio = React.useCallback(() => {
+		if (!blockRef.current) return;
+		const { clientHeight, clientWidth } = blockRef.current;
+		setPreviewSizeRatio((clientHeight / clientWidth) * 100);
+		setPreviewSize({ width: clientWidth, height: clientHeight });
+	}, []);
+
+	React.useLayoutEffect(updatePreviewSizeRatio, []);
+	React.useLayoutEffect(() => {
+		const imageNode = document.createElement("img");
+		imageNode.onload = () => {
+			const { naturalWidth, naturalHeight } = imageNode;
+			setImageSize({ width: naturalWidth, height: naturalHeight });
+		};
+		imageNode.src = `/images/${image}.jpg`;
+	}, [image]);
+
+	React.useEffect(() => {
+		window.addEventListener("resize", updatePreviewSizeRatio);
+		return () => {
+			window.removeEventListener("resize", updatePreviewSizeRatio);
+		};
+	});
 
 	return (
 		<View>
@@ -265,57 +325,79 @@ function ImageControls({
 				</CardHeader>
 				{showPreview && (
 					<>
-						<CardBody
+						<View
+							{...dragGestures}
 							css={{
 								width: "100%",
 								height: 180,
 								position: "relative",
+								padding: 4,
+								background: "#eee",
+								position: "relative",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+								overflow: "hidden",
+								cursor: "grab",
+								"&:active": {
+									cursor: "grabbing",
+								},
 							}}
 						>
-							{showGrid && (
-								<>
-									<GridLine
-										css={{ top: 0, left: "33%", height: "100%", width: 1 }}
-									/>
-									<GridLine
-										css={{ top: 0, left: "66%", height: "100%", width: 1 }}
-									/>
-									<GridLine
-										css={{ left: 0, top: "33%", width: "100%", height: 1 }}
-									/>
-									<GridLine
-										css={{ left: 0, top: "66%", width: "100%", height: 1 }}
-									/>
-								</>
-							)}
 							<View
-								{...dragGestures}
 								css={{
-									background: "rgba(0,0,0,0.1)",
-									position: "absolute",
-									top: 0,
-									left: 0,
-									right: 0,
-									bottom: 0,
-									cursor: "grab",
-									"&:active": {
-										cursor: "grabbing",
-									},
+									position: "relative",
+									height: 0,
+									paddingBottom: `${previewSizeRatio}%`,
+									width: "100%",
+									overflow: "hidden",
 								}}
-							/>
-							<View
-								style={{
-									...backgroundStyles,
-									backgroundAttachment: null,
-									pointerEvents: "none",
-									position: "absolute",
-									top: 0,
-									left: 0,
-									right: 0,
-									bottom: 0,
-								}}
-							/>
-						</CardBody>
+							>
+								{showGrid && (
+									<>
+										<GridLine
+											css={{ top: 0, left: "33%", height: "100%", width: 1 }}
+										/>
+										<GridLine
+											css={{ top: 0, left: "66%", height: "100%", width: 1 }}
+										/>
+										<GridLine
+											css={{ left: 0, top: "33%", width: "100%", height: 1 }}
+										/>
+										<GridLine
+											css={{ left: 0, top: "66%", width: "100%", height: 1 }}
+										/>
+									</>
+								)}
+								<View
+									css={{
+										background: "rgba(0,0,0,0.1)",
+										position: "absolute",
+										borderRadius: 4,
+										top: 0,
+										left: 0,
+										right: 0,
+										bottom: 0,
+										cursor: "grab",
+										"&:active": {
+											cursor: "grabbing",
+										},
+									}}
+								/>
+								<View
+									style={{
+										...backgroundStyles,
+										backgroundAttachment: null,
+										pointerEvents: "none",
+										position: "absolute",
+										top: 0,
+										left: 0,
+										right: 0,
+										bottom: 0,
+									}}
+								/>
+							</View>
+						</View>
 						<Divider />
 					</>
 				)}
@@ -329,17 +411,17 @@ function ImageControls({
 							/>
 						</FormGroup>
 						<Divider />
-						{/* <FormGroup label="Grid">
+						<FormGroup label="Grid">
 							<Switch checked={showGrid} onChange={setGrid} />
 						</FormGroup>
-						<Divider /> */}
-						<FormGroup label="Size">
+						<Divider />
+						<FormGroup label="Fit">
 							<SegmentedControl
 								value={size}
 								onChange={handleOnChangeSize}
 								options={[
-									{ label: "Fill", value: "fill" },
-									{ label: "Fit", value: "fit" },
+									{ label: "Filled", value: "fill" },
+									{ label: "Fitted", value: "fit" },
 									{ label: "Custom", value: "custom" },
 								]}
 							/>
@@ -376,7 +458,7 @@ function ImageControls({
 						</FormGroup>
 
 						{isSizeCustom && (
-							<FormGroup label="Scale">
+							<FormGroup label="Size">
 								<Grid>
 									<TextInput
 										step={1}
@@ -442,6 +524,8 @@ function createBackgroundData(props) {
 		repeat: "no-repeat",
 		px: 50,
 		py: 50,
+		x: 0,
+		y: 0,
 		scale: 1,
 		attachment: "scroll",
 		id: uuid(),
@@ -524,7 +608,10 @@ export default function Home() {
 		createBackgroundData({ image: "potato" }),
 		createBackgroundData({ image: "sand" }),
 	]);
-	const [currentBackgroundId, setCurrentBackgroundId] = React.useState(null);
+	const [currentBackgroundId, setCurrentBackgroundId] = React.useState(
+		backgrounds[0].id
+	);
+	const blockRef = React.useRef();
 
 	const handleOnChange = (next) => {
 		setBackgrounds((prev) => {
@@ -555,6 +642,24 @@ export default function Home() {
 		setBackgrounds((prev) => prev.filter((bg) => bg.id !== id));
 	};
 
+	const dragGestures = useDrag((dragProps) => {
+		if (!dragProps.dragging) return;
+		const [x, y] = dragProps.delta;
+		const { pageX, pageY, target } = dragProps.event;
+		const { clientWidth, clientHeight } = target;
+		const { px, py } = currentBackground;
+		// const next = {
+		// 	px: `${(pageX / clientWidth) * 100}%`,
+		// 	py: `${(pageY / clientHeight) * 100}%`,
+		// };
+
+		const next = {
+			px: add(px, (x / clientWidth) * 100),
+			py: add(py, (y / clientHeight) * 100),
+		};
+		handleOnChange(next);
+	});
+
 	return (
 		<View>
 			<ContextSystemProvider>
@@ -563,7 +668,7 @@ export default function Home() {
 					<link rel="icon" href="/favicon.ico" />
 				</Head>
 				<View
-					css={{ padding: "5vh 5vw 0 0", position: "fixed", top: 0, right: 0 }}
+					css={{ padding: "2vh 2vw 0 0", position: "fixed", top: 0, right: 0 }}
 				>
 					<ClientRender>
 						<View css={{ position: "relative" }}>
@@ -589,7 +694,7 @@ export default function Home() {
 									{!!currentBackgroundId && (
 										<ImageControls
 											{...currentBackground}
-											showPreview={false}
+											blockRef={blockRef}
 											onChange={handleOnChange}
 											onCloseModal={handleOnCloseModal}
 										/>
@@ -601,9 +706,10 @@ export default function Home() {
 				</View>
 			</ContextSystemProvider>
 			<View
+				ref={blockRef}
 				style={{
 					...combinedStyles,
-					height: "100vh",
+					height: "90vh",
 				}}
 			/>
 			<View

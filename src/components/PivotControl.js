@@ -156,7 +156,7 @@ export function PivotControl({ onChange: onChangeProp, value: valueProp }) {
 				handleOnChange(positionIndices[nextPosition]);
 			}
 		},
-		{ threshold: 5 }
+		{ threshold: 1 }
 	);
 
 	const handleOnPivotClick = (next) => (event) => {
