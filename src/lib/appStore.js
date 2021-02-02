@@ -10,6 +10,7 @@ import { BiFont } from "react-icons/bi";
 import { Icon } from "@wp-g2/components";
 import _ from "lodash";
 import createStore from "zustand";
+import shallow from "zustand/shallow";
 
 export const appStore = createStore((set, get) => ({
 	attributes: {
@@ -110,7 +111,7 @@ export const appStore = createStore((set, get) => ({
 
 	toggleBlur: () => {
 		const { toggleAttribute } = get();
-		const next = 0;
+		const next = "0px";
 		toggleAttribute("blur", next);
 	},
 
@@ -122,6 +123,26 @@ export const appStore = createStore((set, get) => ({
 }));
 
 export const useAppStore = appStore;
+
+export const useAttribute = (attribute) => {
+	const [value, setAttribute, getHasAttribute] = appStore(
+		(state) => [
+			_.get(state.attributes, attribute),
+			state.setAttribute,
+			state.getHasAttribute,
+		],
+		shallow
+	);
+
+	const handleOnChange = React.useCallback(
+		(...args) => setAttribute(attribute)(...args),
+		[]
+	);
+
+	const hasAttribute = getHasAttribute(attribute);
+
+	return [value, handleOnChange, hasAttribute];
+};
 
 export const justifyContentOptions = [
 	{

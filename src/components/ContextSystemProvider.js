@@ -5,7 +5,10 @@ export function ContextSystemProvider({ value = {}, ...props }) {
 		Dropdown: { placement: "bottom-end" },
 		DropdownMenu: { minWidth: 120, maxWidth: 160 },
 		DropdownTrigger: { isSubtle: true, isControl: true, size: "small" },
-		FormGroup: { horizontal: true },
+		FormGroup: {
+			horizontal: true,
+			truncate: true,
+		},
 		Separator: { css: { opacity: 0.6 } },
 		SelectDropdown: { minWidth: 120, maxWidth: 160, isPreviewable: true },
 		...value,

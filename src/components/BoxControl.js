@@ -13,8 +13,10 @@ import { ui } from "@wp-g2/styles";
 import { useAppStore } from "@lib/appStore";
 
 export function BoxControl({ label, value, ...otherProps }) {
-	const { attributes: _attributes, setAttribute } = useAppStore();
-	const attributes = _attributes[value];
+	const [attributes, setAttribute] = useAppStore((state) => [
+		state.attributes[value],
+		state.setAttribute,
+	]);
 
 	return (
 		<SectionFormGroup label={label}>

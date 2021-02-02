@@ -4,8 +4,10 @@ import React from "react";
 import _ from "lodash";
 import { ui } from "@wp-g2/styles";
 
-export function MagicBox(props) {
-	const { attributes } = useAppStore();
+export function MagicBox({ attributes: attributeProps, ...props }) {
+	const { attributes: attributeContext } = useAppStore();
+	const attributes = attributeProps || attributeContext;
+
 	const {
 		blur,
 		font,

@@ -11,6 +11,29 @@ body {
 }
 
 [data-magic-box][data-magic-box][data-magic-box] {
+	--mb--flx-ai: initial;
+	--mb--d: initial;
+	--mb--fx-blr: initial;
+	--mb--flx-d: initial;
+	--mb--ftf: initial;
+	--mb--fts: initial;
+	--mb--ftw: initial;
+	--mb--h: initial;
+	--mb--ls: initial;
+	--mb--mb: initial;
+	--mb--ml: initial;
+	--mb--mr: initial;
+	--mb--mt: initial;
+	--mb--op: initial;
+	--mb--ov: initial;
+	--mb--pb: initial;
+	--mb--pl: initial;
+	--mb--pr: initial;
+	--mb--pt: initial;
+	--mb--txa: initial;
+	--mb--txd: initial;
+	--mb--w: initial;
+
 	align-items: var(--mb--flx-ai);
 	display: var(--mb--d, block);
 	filter: blur(var(--mb--fx-blr));

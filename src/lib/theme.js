@@ -177,16 +177,16 @@ const theme = createTheme(({ get, space, theme }) => {
 
 	return {
 		...theme,
-		...FONT_PROPS,
-		...BUTTON_PROPS,
-		...CARD_PROPS,
+		// ...FONT_PROPS,
+		// ...BUTTON_PROPS,
+		// ...CARD_PROPS,
 		...COLOR_PROPS,
-		...CONTROL_PROPS,
-		...ELEVATION_PROPS,
-		...MENU_PROPS,
-		...SEGMENTED_CONTROL_PROPS,
-		...SLIDER_PROPS,
-		...SWITCH_PROPS,
+		// ...CONTROL_PROPS,
+		// ...ELEVATION_PROPS,
+		// ...MENU_PROPS,
+		// ...SEGMENTED_CONTROL_PROPS,
+		// ...SLIDER_PROPS,
+		// ...SWITCH_PROPS,
 	};
 });
 
