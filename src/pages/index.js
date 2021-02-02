@@ -580,8 +580,11 @@ function DemoContent() {
 
 function ContainerCard({ children }) {
 	return (
-		<Container width={280}>
-			<Card isBorderless elevation={5}>
+		<Container
+			width={280}
+			css={{ position: "fixed", top: 0, bottom: 0, right: 0 }}
+		>
+			<Card isBorderless elevation={3} css={{ height: "100%" }}>
 				<CardBody>
 					<VStack spacing={1}>{children}</VStack>
 				</CardBody>
